@@ -11,31 +11,6 @@ source "$SCRIPT_DIR/file-utils.sh"
 # No colors - using default terminal colors
 
 
-# Function to create context template
-create_context_template() {
-    local feature_name="$1"
-    local numbered_feature_name="$2"
-    local sanitized_name=$(sanitize_feature_name "$feature_name")
-    local feature_dir="specs/$numbered_feature_name"
-    local context_file="$feature_dir/context.md"
-    local template_file=".specify/templates/context.md"
-    
-    # Create feature directory
-    create_feature_structure "$feature_name" "$numbered_feature_name"
-    
-    # Check if template file exists
-    if [[ ! -f "$template_file" ]]; then
-        echo "Error: Template file not found: $template_file"
-        return 1
-    fi
-    
-    # Create context.md from template
-    sed "s/{{FEATURE_NAME}}/$feature_name/g" "$template_file" > "$context_file"
-    
-    # Return the numbered name for use in branch creation
-    echo "$numbered_feature_name"
-}
-
 # Main specify function
 specify_feature() {
     local feature_name="$1"
@@ -98,15 +73,27 @@ specify_feature() {
         echo "Created and switched to branch: $branch_name"
     fi
     
-    # Create context template
-    create_context_template "$feature_name" "$numbered_feature_name"
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to create context template"
+    # Create feature directory and context file
+    local feature_dir="specs/$numbered_feature_name"
+    local context_file="$feature_dir/context.md"
+    local template_file=".specify/templates/context.md"
+    
+    # Create feature directory
+    echo "Creating feature structure for: $feature_name"
+    mkdir -p "$feature_dir"
+    
+    # Check if template file exists
+    if [[ ! -f "$template_file" ]]; then
+        echo "Error: Template file not found: $template_file"
         return 1
     fi
     
-    # Context file created: specs/$numbered_feature_name/context.md
-    local context_file="specs/$numbered_feature_name/context.md"
+    # Create context.md from template
+    sed "s/{{FEATURE_NAME}}/$feature_name/g" "$template_file" > "$context_file"
+    if [[ $? -ne 0 ]]; then
+        echo "Failed to create context file from template"
+        return 1
+    fi
     
     # Verify context file was created
     if [[ ! -f "$context_file" ]]; then
@@ -118,7 +105,7 @@ specify_feature() {
     echo "FEATURE: $numbered_feature_name"
     echo "FEATURE_INPUT: $feature_name"
     echo "FEATURE_BRANCH: $branch_name"
-    echo "FEATURE_DIR: specs/$numbered_feature_name"
+    echo "FEATURE_DIR: $feature_dir"
     echo "FEATURE_CONTEXT: $context_file"
     
     echo ""
