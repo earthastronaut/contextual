@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch naming and management utilities for spec-driven development
-# Usage: source .specify/scripts/bash/branch-utils.sh
+# Usage: source .specify/scripts/bash/utils/branch-utils.sh
 
 # No colors - using default terminal colors
 
@@ -41,69 +41,6 @@ get_current_feature_display_name() {
     else
         echo ""
     fi
-}
-
-# Function to get next incremental number for feature branch
-get_next_feature_number() {
-    local base_name="$1"
-    local max_num=0
-    
-    # Find the highest existing number for this base name from git branches
-    while IFS= read -r branch; do
-        local branch_name="${branch#feature/}"
-        if [[ $branch_name =~ ^([0-9]{4})-$base_name$ ]]; then
-            local num="${BASH_REMATCH[1]}"
-            # Remove leading zeros for comparison
-            num=$((10#$num))
-            if [[ $num -gt $max_num ]]; then
-                max_num=$num
-            fi
-        fi
-    done < <(git branch | grep "feature/.*-$base_name")
-    
-    # Also check existing specs directories for numbered features
-    if [[ -d "specs" ]]; then
-        while IFS= read -r spec_dir; do
-            local dir_name=$(basename "$spec_dir")
-            if [[ $dir_name =~ ^([0-9]{4})-$base_name$ ]]; then
-                local num="${BASH_REMATCH[1]}"
-                # Remove leading zeros for comparison
-                num=$((10#$num))
-                if [[ $num -gt $max_num ]]; then
-                    max_num=$num
-                fi
-            fi
-        done < <(find specs -maxdepth 1 -type d -name "*-$base_name" 2>/dev/null)
-    fi
-    
-    # Return next number with zero padding
-    printf "%04d" $((max_num + 1))
-}
-
-# Function to create feature branch
-create_feature_branch() {
-    local feature_name="$1"
-    local sanitized_name=$(sanitize_feature_name "$feature_name")
-    
-    # Get next incremental number
-    local next_num=$(get_next_feature_number "$sanitized_name")
-    local branch_name="feature/$next_num-$sanitized_name"
-    
-    # Check if branch already exists
-    if git show-ref --verify --quiet refs/heads/"$branch_name"; then
-        echo "Branch $branch_name already exists. Switching to it."
-        git checkout "$branch_name"
-        echo "$branch_name"
-        return
-    fi
-    
-    echo "Creating feature branch: $branch_name"
-    
-    # Create and switch to new branch
-    git checkout -b "$branch_name"
-    echo "Created and switched to branch: $branch_name"
-    
-    echo "$branch_name"
 }
 
 # Function to check if we're on a feature branch
@@ -167,31 +104,13 @@ validate_feature_setup() {
     return 0
 }
 
-# Function to list all feature branches
-list_feature_branches() {
-    echo "Feature branches:"
-    git branch | grep "feature/" | sed 's/^[ *]*//' | while read -r branch; do
-        local feature_name="${branch#feature/}"
-        local context_file="specs/$feature_name/context.md"
-        if [[ -f "$context_file" ]]; then
-            local display_name=$(grep "^# Feature:" "$context_file" | sed 's/^# Feature: *//' | head -1)
-            echo "  $branch - $display_name"
-        else
-            echo "  $branch - (no context file)"
-        fi
-    done
-}
-
 # Export functions for use in other scripts
 export -f sanitize_feature_name
 export -f get_current_feature_name
 export -f get_current_feature_display_name
-export -f get_next_feature_number
-export -f create_feature_branch
 export -f is_feature_branch
 export -f get_feature_dir
 export -f get_context_file
 export -f validate_feature_setup
-export -f list_feature_branches
 
 echo "Branch utilities loaded" >&2

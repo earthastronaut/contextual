@@ -5,8 +5,8 @@
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/branch-utils.sh"
-source "$SCRIPT_DIR/file-utils.sh"
+source "$SCRIPT_DIR/utils/print-utils.sh"
+source "$SCRIPT_DIR/utils/branch-utils.sh"
 
 # No colors - using default terminal colors
 
@@ -17,7 +17,7 @@ specify_feature() {
     local specs_dir="${2:-./specs}"
     
     if [[ -z "$feature_name" ]]; then
-        echo "Error: Feature name is required"
+        print_error "Feature name is required"
         echo "Usage: specify_feature \"Feature Name\" [specs_directory]"
         return 1
     fi
@@ -50,7 +50,7 @@ specify_feature() {
     
     # Check if we're in a git repository
     if ! git rev-parse --git-dir > /dev/null 2>&1; then
-        echo "Error: Not in a git repository"
+        print_error "Not in a git repository"
         return 1
     fi
     
@@ -59,7 +59,7 @@ specify_feature() {
         echo "Branch $branch_name already exists. Switching to it."
         git checkout "$branch_name"
         if [[ $? -ne 0 ]]; then
-            echo "Failed to switch to existing branch"
+            print_error "Failed to switch to existing branch"
             return 1
         fi
     else
@@ -67,7 +67,7 @@ specify_feature() {
         # Create and switch to new branch
         git checkout -b "$branch_name"
         if [[ $? -ne 0 ]]; then
-            echo "Failed to create feature branch"
+            print_error "Failed to create feature branch"
             return 1
         fi
         echo "Created and switched to branch: $branch_name"
@@ -84,20 +84,20 @@ specify_feature() {
     
     # Check if template file exists
     if [[ ! -f "$template_file" ]]; then
-        echo "Error: Template file not found: $template_file"
+        print_error "Template file not found: $template_file"
         return 1
     fi
     
     # Create context.md from template
     sed "s/{{FEATURE_NAME}}/$feature_name/g" "$template_file" > "$context_file"
     if [[ $? -ne 0 ]]; then
-        echo "Failed to create context file from template"
+        print_error "Failed to create context file from template"
         return 1
     fi
     
     # Verify context file was created
     if [[ ! -f "$context_file" ]]; then
-        echo "Error: Context file was not created: $context_file"
+        print_error "Context file was not created: $context_file"
         return 1
     fi
     
@@ -109,7 +109,7 @@ specify_feature() {
     echo "FEATURE_CONTEXT: $context_file"
     
     echo ""
-    echo "✅ Feature specification created successfully!"
+    print_success "Feature specification created successfully!"
     echo "   You can now edit the context file to define your feature requirements."
     
     return 0
@@ -118,7 +118,7 @@ specify_feature() {
 # If script is run directly (not sourced)
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     if [[ $# -eq 0 ]]; then
-        echo "Error: Feature name is required"
+        print_error "Feature name is required"
         echo "Usage: $0 \"Feature Name\" [specs_directory]"
         exit 1
     fi

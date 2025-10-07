@@ -5,8 +5,8 @@
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/branch-utils.sh"
-source "$SCRIPT_DIR/file-utils.sh"
+source "$SCRIPT_DIR/utils/print-utils.sh"
+source "$SCRIPT_DIR/utils/branch-utils.sh"
 
 # No colors - using default terminal colors
 
@@ -22,14 +22,14 @@ check_implementation_readiness() {
     local line_count=$(wc -l < "$context_file")
     
     if [[ $line_count -lt 10 ]]; then
-        echo "Warning: Context file seems minimal. Consider adding more details."
+        print_warning "Context file seems minimal. Consider adding more details."
     fi
     
     # Check for uncommitted changes in context file
     if git ls-files --error-unmatch "$context_file" >/dev/null 2>&1; then
         # File is tracked by git
         if ! git diff --quiet "$context_file"; then
-            echo "Error: Context file has uncommitted changes. Please commit changes before implementation." >&2
+            print_error "Context file has uncommitted changes. Please commit changes before implementation." >&2
             echo "File: $context_file" >&2
             echo "Use: git add '$context_file' && git commit -m 'Update context file'" >&2
             return 1
@@ -64,7 +64,7 @@ EOF
 output_variables() {
     local context_file=$(get_context_file)
     if [[ -z "$context_file" ]]; then
-        echo "Error: Could not find context file" >&2
+        print_error "Could not find context file" >&2
         return 1
     fi
     
@@ -88,7 +88,7 @@ implement_feature() {
     
     # Check readiness (suppress output for variable mode)
     if ! check_implementation_readiness >/dev/null 2>&1; then
-        echo "Error: Implementation not ready" >&2
+        print_error "Implementation not ready" >&2
         return 1
     fi
     

@@ -3,8 +3,9 @@
 # Project Structure Analysis Script - Variables Only
 # Usage: .specify/scripts/bash/analyze.sh
 
-# Source common utilities
-source "$(dirname "$0")/common.sh"
+# Source utility scripts
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/config-utils.sh"
 
 # Analysis configuration variables
 ANALYSIS_OUTPUT_DIR="$SPECS_DIR/FEATURES"

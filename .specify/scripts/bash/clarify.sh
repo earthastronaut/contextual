@@ -5,9 +5,9 @@
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/common.sh"
-source "$SCRIPT_DIR/branch-utils.sh"
-source "$SCRIPT_DIR/file-utils.sh"
+source "$SCRIPT_DIR/utils/print-utils.sh"
+source "$SCRIPT_DIR/utils/env-utils.sh"
+source "$SCRIPT_DIR/utils/branch-utils.sh"
 
 # Function to check prerequisites
 check_prerequisites() {
@@ -34,7 +34,7 @@ check_prerequisites() {
 get_feature_variables() {
     local context_file=$(get_context_file)
     local feature_name=$(get_current_feature_display_name)
-    local feature_dir=$(get_feature_directory)
+    local feature_dir=$(get_feature_dir)
     local feature_branch=$(git branch --show-current)
     
     # Output variables in format expected by clarify.md
@@ -54,7 +54,7 @@ get_feature_variables() {
 clarify_feature() {
     # Check prerequisites
     if ! check_prerequisites; then
-        echo "Error: Prerequisites not met. Please ensure you're on a feature branch with a context file."
+        print_error "Prerequisites not met. Please ensure you're on a feature branch with a context file."
         return 1
     fi
     
