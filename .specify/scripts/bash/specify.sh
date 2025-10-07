@@ -5,6 +5,7 @@
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/config-utils.sh"
 source "$SCRIPT_DIR/utils/print-utils.sh"
 source "$SCRIPT_DIR/utils/branch-utils.sh"
 
@@ -14,7 +15,7 @@ source "$SCRIPT_DIR/utils/branch-utils.sh"
 # Main specify function
 specify_feature() {
     local feature_name="$1"
-    local specs_dir="${2:-./specs}"
+    local specs_dir="${2:-$SPECS_DIR}"
     
     if [[ -z "$feature_name" ]]; then
         print_error "Feature name is required"
@@ -74,9 +75,9 @@ specify_feature() {
     fi
     
     # Create feature directory and context file
-    local feature_dir="specs/$numbered_feature_name"
+    local feature_dir="$SPECS_DIR/$numbered_feature_name"
     local context_file="$feature_dir/context.md"
-    local template_file=".specify/templates/context.md"
+    local template_file="$SPECIFY_ROOT/templates/context.md"
     
     # Create feature directory
     echo "Creating feature structure for: $feature_name"

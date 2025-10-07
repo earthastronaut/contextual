@@ -4,6 +4,7 @@
 # Usage: source .specify/scripts/bash/utils/config-utils.sh
 
 # Configuration variables
+GIT_REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 SPECIFY_ROOT=".specify"
 CONTEXT_DIR="$SPECIFY_ROOT/context"
 SCRIPTS_DIR="$SPECIFY_ROOT/scripts/bash"
@@ -28,6 +29,7 @@ refresh_context() {
 refresh_context
 
 # Export variables and functions for use in other scripts
+export GIT_REPO_ROOT
 export SPECIFY_ROOT
 export CONTEXT_DIR
 export SCRIPTS_DIR

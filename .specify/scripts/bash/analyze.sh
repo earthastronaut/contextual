@@ -12,7 +12,7 @@ ANALYSIS_OUTPUT_DIR="$SPECS_DIR/FEATURES"
 ANALYSIS_OUTPUT_FILE="$ANALYSIS_OUTPUT_DIR/analyzed.md"
 
 # Project structure variables
-PROJECT_ROOT="$(pwd)"
+PROJECT_ROOT="$GIT_REPO_ROOT"
 GIT_BRANCH="$(git branch --show-current 2>/dev/null || echo 'unknown')"
 GIT_STATUS_COUNT="$(git status --porcelain | wc -l)"
 

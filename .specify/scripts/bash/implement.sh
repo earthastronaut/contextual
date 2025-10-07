@@ -5,6 +5,7 @@
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/utils/config-utils.sh"
 source "$SCRIPT_DIR/utils/print-utils.sh"
 source "$SCRIPT_DIR/utils/branch-utils.sh"
 
