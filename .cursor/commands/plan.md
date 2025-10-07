@@ -22,7 +22,9 @@ Update the `specs/FEATURE_DIR/context.md` file with direct link to a `specs/FEAT
 - Identify what's already implemented vs. missing
 
 ### 4. Generate Concise Plan
-- Create focused task breakdown (max 10-15 tasks)
+- Create focused task breakdown (max 10 tasks) using `- [ ]` syntax and prioritize less tasks if possible
+- Organize tasks into logical phases (e.g., "Phase 1: Foundation", "Phase 2: Core Features")
+- Use `- [ ]` syntax for all tasks (markdown checkbox format)
 - Prioritize by dependency and importance
 - Include only essential technical decisions
 
@@ -38,7 +40,8 @@ Update the `specs/FEATURE_DIR/context.md` file with direct link to a `specs/FEAT
 ## Output
 - `specs/FEATURE_DIR/plan.md` file with detailed implementation plan
 - Updated `specs/FEATURE_DIR/context.md` with link to the plan
-- Focused task breakdown (max 10-15 tasks)
+- Focused task breakdown (max 10 tasks) using `- [ ]` syntax and prioritize less tasks if possible
+- Tasks organized into logical phases for better execution flow
 - Prioritized by dependency and importance
 - Essential technical decisions included
 
@@ -55,4 +58,6 @@ The plan.md file should be **concise and actionable**
 **Key Principles:**
 - **Keep context file focused** on requirements, not implementation details
 - **Reference the detailed plan** rather than duplicating it
+- **Use `- [ ]` syntax** for all tasks to enable easy tracking
+- **Organize into phases** for logical execution flow and better project management
 - **Maintain readability** with brief, scannable format

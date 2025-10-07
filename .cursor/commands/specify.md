@@ -1,29 +1,40 @@
 # Specify New Feature
 
 ## Goal
-Create a new feature context.md file in the spec-driven development flow based on the user input. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
+Create a new feature context.md file in the spec-driven development flow based on the user input. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION AND INSTRUCTIONS.
 
 ## User Input
+
  $ARGUMENTS
 
 ## Steps
 
-### 1. Generate Feature Input
+### 0. Validate User Input
+
+Analyze the user input and make sure it is valid. Must be longer than 30 characters.
+- **Feature Name & Description**: What the feature does and its purpose
+- **User Stories**: Who uses it and what they want to accomplish  
+- **Technical Details**: Technology stack, integrations, performance needs
+- **User Experience**: UI/UX elements, workflows, and interactions
+
+
+### 0. Generate Feature Input
 From the user input, generate a concise (less than 30 characters) and santized kabab-case name and put into $FEATURE_INPUT.
 
-### 2. Create Structure and Get Feature Name
+### 1. Create Structure and Get Feature Name
 Execute: `.specify/scripts/bash/specify.sh "$FEATURE_INPUT"`
-
 This will output:
 - FEATURE: The sanitized feature name
 - FEATURE_BRANCH: The created branch name
 - FEATURE_DIR: The feature directory path
 - FEATURE_CONTEXT: The context file path
 
-### 3. Analyze Context
-MUST READ ALL FILES `.specify/context/*` directory. These are the global context for the project. Follow all links and files to understand the domain, technical specifications, and other context that may be relevant to the feature.
+### 2. Analyze Context
+READ THROUGH THE `.specify/context/README.md` file to understand the context. For each link in the file:
+- Decide from the user input if this file should be included.
+- If it should be included, read the file.
 
-### 4. Update Specification
+### . Update Specification
 UPDATE THE `${FEATURE_CONTEXT}` file with the following information:
 
 1. **Update Specification**: Update the `${FEATURE_CONTEXT}` file with the following information. Keep it concise and to the point with the key information.
@@ -35,11 +46,6 @@ UPDATE THE `${FEATURE_CONTEXT}` file with the following information:
 - Tasks
 2. **Analyze**: Analyze and put [NEEDS CLARIFICATION: question?] for anything that is not clear
 3. **Verify clarifications**: Check spec has `## Clarifications` section or user override
-
-### 5. Report Progress
-Provide a concise report of the progress made and next steps:
-- Use `/clarify` to highlight any uncertainties or questions
-- Use `/implement` to make changes based on the context.md file
 
 ## Output
 - New feature directory structure: `specs/FEATURE_DIR/`
