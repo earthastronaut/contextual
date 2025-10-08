@@ -7,7 +7,7 @@
 GIT_REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 SPECIFY_ROOT=".specify"
 CONTEXT_DIR="$SPECIFY_ROOT/context"
-SCRIPTS_DIR="$SPECIFY_ROOT/scripts/bash"
+CONTEXT_ROOT="$CONTEXT_DIR/README.md"
 SPECS_DIR="specs"
 
 # Function to get all context files
@@ -32,7 +32,6 @@ refresh_context
 export GIT_REPO_ROOT
 export SPECIFY_ROOT
 export CONTEXT_DIR
-export SCRIPTS_DIR
 export SPECS_DIR
 export CONTEXT
 export -f get_context_files

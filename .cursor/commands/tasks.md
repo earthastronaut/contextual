@@ -8,17 +8,18 @@ Update the feature context by extracting tasks from `specs/FEATURE_DIR/context.m
 
 ## Steps
 
-### 1. Check Prerequisites
-- Run `.specify/scripts/bash/tasks.sh` to get feature variables
-- Verify FEATURE_CONTEXT variables are set
+### 1. Prerequisites
+Execute: `.specify/scripts/bash/implement.sh`
+This will output:
+- $FEATURE_CONTEXT: The context file path
 
-### 2. Analyze FEATURE_CONTEXT File
-- Read the current `specs/FEATURE_DIR/context.md` file
+### 2. Analyze Context File
+- Read the current $FEATURE_CONTEXT file
 - Identify the "Tasks" section and extract all task items
 - Note any task status indicators (completed, pending, etc.)
 
 ### 3. Check for Existing Plan File
-- Check if `specs/FEATURE_DIR/plan.md` exists
+- Check if `$FEATURE_DIR/plan.md` exists
 - If plan exists, read and analyze the plan structure
 - Extract phases, groupings, and task organization from the plan
 - Use plan structure as the foundation for task organization
@@ -30,15 +31,15 @@ Update the feature context by extracting tasks from `specs/FEATURE_DIR/context.m
 - Cross-reference with plan phases if available
 
 ### 5. Create Tasks File
-- Generate `specs/FEATURE_DIR/tasks.md` with comprehensive task breakdown
+- Generate `$FEATURE_DIR/tasks.md` with comprehensive task breakdown
 - If plan exists, organize tasks by phases and groupings from the plan
 - If no plan exists, organize tasks by category or priority
 - Preserve all existing task status and descriptions
 - Include clear task descriptions and acceptance criteria
 
 ### 6. Update Context File
-- Remove the "Tasks" section from `specs/FEATURE_DIR/context.md`
-- Add a reference link to the new `tasks.md` file
+- Remove the "Tasks" section from $FEATURE_CONTEXT
+- Add a reference link to the new `$FEATURE_DIR/tasks.md` file
 - Maintain all other content and structure
 - Ensure the context file remains focused on requirements and specifications
 
@@ -48,8 +49,8 @@ Update the feature context by extracting tasks from `specs/FEATURE_DIR/context.m
 - Check that task status is preserved accurately
 
 ## Output
-- `specs/FEATURE_DIR/tasks.md` file with comprehensive task breakdown
-- Updated `specs/FEATURE_DIR/context.md` with link to tasks file
+- `$FEATURE_DIR/tasks.md` file with comprehensive task breakdown
+- Updated $FEATURE_CONTEXT with link to tasks file
 - Tasks organized by phases and groupings (if plan exists) or by category/priority
 - Clear task descriptions and status indicators
 - Preserved task dependencies and relationships

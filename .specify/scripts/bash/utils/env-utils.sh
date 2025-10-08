@@ -4,8 +4,8 @@
 # Usage: source .specify/scripts/bash/utils/env-utils.sh
 
 # Source print utilities for error messages
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/print-utils.sh"
+_ENV_UTILS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$_ENV_UTILS_DIR/print-utils.sh"
 
 # Function to check if git repository is initialized
 check_git_repo() {

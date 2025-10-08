@@ -4,19 +4,19 @@
 Brief description of the feature
 
 ## Requirements
-- [ ] Requirement 1
-- [ ] Requirement 2
-- [ ] Requirement 3
+- Requirement 1
+- Requirement 2
+- Requirement 3
 
 ## Technical Specifications
-- Technology stack
-- Architecture decisions
-- Dependencies
+- Technology stack changes if any
+- Architecture decisions changes if any
+- Dependencies changes if any
 
 ## Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- Criterion 1
+- Criterion 2
+- Criterion 3
 
 ## Implementation Notes
 - Any specific implementation details

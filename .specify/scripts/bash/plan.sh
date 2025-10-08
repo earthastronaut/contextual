@@ -39,15 +39,13 @@ get_feature_variables() {
     local feature_branch=$(git branch --show-current)
     
     # Output variables in format expected by plan.md
+    echo "SPECIFY_DIR: $SPECIFY_DIR"
     echo "FEATURE: $feature_name"
-    echo "FEATURE_BRANCH: $feature_branch"
-    echo "FEATURE_DIR: $feature_dir"
     echo "FEATURE_CONTEXT: $context_file"
     
     # Export variables for use by other scripts
+    export SPECIFY_DIR="$SPECIFY_DIR"
     export FEATURE_NAME="$feature_name"
-    export FEATURE_BRANCH="$feature_branch"
-    export FEATURE_DIR="$feature_dir"
     export FEATURE_CONTEXT="$context_file"
 }
 
@@ -79,7 +77,7 @@ show_plan_help() {
     echo ""
     echo "What it does:"
     echo "  1. Checks prerequisites"
-    echo "  2. Returns feature variables (FEATURE, FEATURE_BRANCH, FEATURE_DIR, FEATURE_CONTEXT)"
+    echo "  2. Returns feature variables (FEATURE, FEATURE_CONTEXT)"
     echo ""
     echo "Example:"
     echo "  plan"

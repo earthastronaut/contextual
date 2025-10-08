@@ -39,6 +39,8 @@ get_feature_variables() {
     local feature_branch=$(git branch --show-current)
     
     # Output variables in format expected by clarify.md
+    echo "CONTEXT_ROOT: $CONTEXT_ROOT"
+    echo "GIT_REPO_ROOT: $GIT_REPO_ROOT"
     echo "FEATURE: $feature_name"
     echo "FEATURE_BRANCH: $feature_branch"
     echo "FEATURE_DIR: $feature_dir"

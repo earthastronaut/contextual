@@ -57,21 +57,18 @@ specify_feature() {
     
     # Check if branch already exists
     if git show-ref --verify --quiet refs/heads/"$branch_name"; then
-        echo "Branch $branch_name already exists. Switching to it."
         git checkout "$branch_name"
         if [[ $? -ne 0 ]]; then
             print_error "Failed to switch to existing branch"
             return 1
         fi
     else
-        echo "Creating feature branch: $branch_name"
         # Create and switch to new branch
         git checkout -b "$branch_name"
         if [[ $? -ne 0 ]]; then
             print_error "Failed to create feature branch"
             return 1
         fi
-        echo "Created and switched to branch: $branch_name"
     fi
     
     # Create feature directory and context file
@@ -80,7 +77,6 @@ specify_feature() {
     local template_file="$SPECIFY_ROOT/templates/context.md"
     
     # Create feature directory
-    echo "Creating feature structure for: $feature_name"
     mkdir -p "$feature_dir"
     
     # Check if template file exists
@@ -103,15 +99,11 @@ specify_feature() {
     fi
     
     # Echo key variables
+    echo "CONTEXT_ROOT: $CONTEXT_ROOT"
     echo "FEATURE: $numbered_feature_name"
-    echo "FEATURE_INPUT: $feature_name"
     echo "FEATURE_BRANCH: $branch_name"
     echo "FEATURE_DIR: $feature_dir"
     echo "FEATURE_CONTEXT: $context_file"
-    
-    echo ""
-    print_success "Feature specification created successfully!"
-    echo "   You can now edit the context file to define your feature requirements."
     
     return 0
 }
