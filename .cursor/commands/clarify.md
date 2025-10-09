@@ -84,7 +84,7 @@ After running this command:
 3. Use `/analyze` to examine project structure if needed
 4. Use `/implement` to begin implementation once planning is complete
 
-## Integration Rules
+## Guidelines
 - Create `## Clarifications` section if missing in $FEATURE_CONTEXT file
 - Add session subheading with date
 - Update appropriate spec sections in $FEATURE_CONTEXT file

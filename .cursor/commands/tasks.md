@@ -63,10 +63,7 @@ After running this command:
 4. Use `/implement` to begin executing tasks
 5. Update task status as work progresses
 
-## Task File Format
-The tasks.md file should be **well-organized and actionable**
-
-**Key Principles:**
+## Guidelines
 - **Separate concerns** by moving tasks out of context file
 - **Maintain task status** and progress tracking
 - **Follow plan structure** if `plan.md` exists, organizing by phases and groupings

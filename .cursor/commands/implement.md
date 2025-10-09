@@ -50,3 +50,18 @@ For all tasks
 - Progress updates during execution
 - Final summary with suggested commit: `"feat: implement $FEATURE"`
 - Updated $FEATURE_CONTEXT and all linked files with completed task markers
+
+## Next Steps
+After running this command:
+1. Review the implementation results and validate against acceptance criteria
+2. Update any remaining incomplete tasks
+3. Commit changes with the suggested commit message
+4. Use `/clarify` if any ambiguities arise during implementation
+5. Use `/plan` to create additional implementation phases if needed
+
+## Guidelines
+- **Task tracking**: Mark completed tasks as `[x]` in ALL relevant files
+- **Error handling**: Continue with independent tasks if some fail (halt only on critical failures)
+- **Validation**: Check against acceptance criteria from all sources
+- **Progress updates**: Update all relevant files with error notes and progress
+- **Scope boundaries**: Only modify files within the project scope, not specification files

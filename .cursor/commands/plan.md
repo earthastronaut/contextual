@@ -54,10 +54,7 @@ After running this command:
 3. Use `/implement` to begin executing the implementation plan
 4. Update the plan as needed during implementation
 
-## Concise Output Format
-The `$FEATURE_DIR/plan.md` file should be **concise and actionable**
-
-**Key Principles:**
+## Guidelines
 - **Separation of concerns**: Keep context file focused on requirements, reference detailed plan rather than duplicating it
 - **Task tracking**: Use `- [ ]` syntax for all tasks to enable easy progress tracking
 - **Logical organization**: Organize tasks into phases for clear execution flow and better project management
