@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Print utilities for spec-driven development
-# Usage: source .specify/scripts/bash/utils/print-utils.sh
+# Usage: source .contextual/scripts/bash/utils/print-utils.sh
 
 # No colors - using default terminal colors
 

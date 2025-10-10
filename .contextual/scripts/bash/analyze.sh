@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Project Structure Analysis Script - Variables Only
-# Usage: .specify/scripts/bash/analyze.sh
+# Usage: .contextual/scripts/bash/analyze.sh
 
 # Source utility scripts
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -37,18 +37,18 @@ HAS_TESTS_DIR="$(test -d tests -o -d test && echo 'true' || echo 'false')"
 HAS_DOCS_DIR="$(test -d docs && echo 'true' || echo 'false')"
 
 # Documentation variables
-README_FILES="$(find . -maxdepth 2 -name "README*" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-DOC_FILES="$(find . -maxdepth 2 -name "*.md" ! -name "README*" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-CONTEXT_FILES="$(find . -name "*FEATURE_CONTEXT*" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
+README_FILES="$(find . -maxdepth 2 -name "README*" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+DOC_FILES="$(find . -maxdepth 2 -name "*.md" ! -name "README*" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+CONTEXT_FILES="$(find . -name "*FEATURE_CONTEXT*" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
 
 # File count variables
-TOTAL_FILES="$(find . -type f ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-JS_FILES="$(find . -type f -name "*.js" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-PY_FILES="$(find . -type f -name "*.py" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-RB_FILES="$(find . -type f -name "*.rb" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-RS_FILES="$(find . -type f -name "*.rs" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-GO_FILES="$(find . -type f -name "*.go" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
-JAVA_FILES="$(find . -type f -name "*.java" ! -path './.*' ! -path './.specify*' 2>/dev/null | wc -l)"
+TOTAL_FILES="$(find . -type f ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+JS_FILES="$(find . -type f -name "*.js" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+PY_FILES="$(find . -type f -name "*.py" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+RB_FILES="$(find . -type f -name "*.rb" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+RS_FILES="$(find . -type f -name "*.rs" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+GO_FILES="$(find . -type f -name "*.go" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
+JAVA_FILES="$(find . -type f -name "*.java" ! -path './.*' ! -path './.contextual*' 2>/dev/null | wc -l)"
 
 # Export all variables
 export ANALYSIS_OUTPUT_DIR

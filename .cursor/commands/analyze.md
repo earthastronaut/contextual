@@ -9,14 +9,14 @@ $ARGUMENTS
 ## Steps
 
 ### 1. Prerequisites
-Execute: `.specify/scripts/bash/analyze.sh`
+Execute: `.contextual/scripts/bash/analyze.sh`
 This will output:
 - $SPECIFY_DIR: The specify directory path
 - $PROJECT_ROOT: The project root directory
 - $FEATURE_CONTEXT: The context file path
 
 ### 2. Analyze Project Structure
-- Execute: `.specify/scripts/bash/folder-analyzer.sh --input $PROJECT_ROOT --output $FEATURE_DIR/analyzed.md`
+- Execute: `.contextual/scripts/bash/folder-analyzer.sh --input $PROJECT_ROOT --output $FEATURE_DIR/analyzed.md`
 This will output: files and directories
 
 ### 3. File Analysis Loop

@@ -9,7 +9,7 @@ Implement the feature based on the context and all linked files.
 ## Steps
 
 ### 1. Prerequisites
-Execute: `.specify/scripts/bash/implement.sh`
+Execute: `.contextual/scripts/bash/implement.sh`
 This will output:
 - $FEATURE_CONTEXT: The context file path
 

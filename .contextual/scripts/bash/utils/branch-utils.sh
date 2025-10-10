@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Branch naming and management utilities for spec-driven development
-# Usage: source .specify/scripts/bash/utils/branch-utils.sh
+# Usage: source .contextual/scripts/bash/utils/branch-utils.sh
 
 # No colors - using default terminal colors
 

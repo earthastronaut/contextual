@@ -9,7 +9,7 @@ Update the $FEATURE_CONTEXT file to move all tasks into a linked file `$FEATURE_
 ## Steps
 
 ### 1. Prerequisites
-Execute: `.specify/scripts/bash/plan.sh`
+Execute: `.contextual/scripts/bash/plan.sh`
 This will output:
 - $SPECIFY_DIR: The specify directory path
 - $FEATURE_CONTEXT: The context file path

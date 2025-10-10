@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Environment validation utilities for spec-driven development
-# Usage: source .specify/scripts/bash/utils/env-utils.sh
+# Usage: source .contextual/scripts/bash/utils/env-utils.sh
 
 # Source print utilities for error messages
 _ENV_UTILS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,8 +18,8 @@ check_git_repo() {
 
 # Function to check if we're in the project root
 check_project_root() {
-    if [[ ! -d ".specify" ]]; then
-        print_error "Not in project root. Expected .specify directory."
+    if [[ ! -d ".contextual" ]]; then
+        print_error "Not in project root. Expected .contextual directory."
         return 1
     fi
     return 0

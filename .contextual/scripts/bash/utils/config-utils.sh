@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Configuration utilities for spec-driven development
-# Usage: source .specify/scripts/bash/utils/config-utils.sh
+# Usage: source .contextual/scripts/bash/utils/config-utils.sh
 
 # Configuration variables
 GIT_REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-SPECIFY_ROOT=".specify"
+SPECIFY_ROOT=".contextual"
 CONTEXT_DIR="$SPECIFY_ROOT/context"
 CONTEXT_ROOT="$CONTEXT_DIR/README.md"
 SPECS_DIR="specs"
@@ -25,7 +25,7 @@ refresh_context() {
     export CONTEXT
 }
 
-# Initialize CONTEXT variable with all files in .specify/context
+# Initialize CONTEXT variable with all files in .contextual/context
 refresh_context
 
 # Export variables and functions for use in other scripts

@@ -5,7 +5,7 @@ This directory contains the simplified spec-driven development workflow.
 ## Directory Structure
 
 ```
-.specify/
+.contextual/
 ├── context/          # Global context storage (renamed from memory/)
 ├── scripts/          # Bash scripts for automation
 │   └── bash/         # Bash utility scripts
@@ -37,14 +37,6 @@ Use `.cursor/commands/implement.md` to:
 - Update tasks if present
 - Run implementation in the LLM
 
-## Key Changes from Previous Version
-
-- **Renamed**: `.specify/memory/` → `.specify/context/`
-- **Simplified**: Two-command workflow (specify → implement)
-- **Streamlined**: Direct context reading and implementation
-- **Task-aware**: Automatic task management during implementation
-- **Scripted**: Added bash scripts for automation and clear variables
-
 ## Usage Examples
 
 ### Using Cursor Commands
@@ -56,7 +48,7 @@ Use `.cursor/commands/implement.md` to:
 ### Using Bash Scripts
 ```bash
 # Load the main tool
-source .specify/scripts/bash/specify-dev.sh
+source .contextual/scripts/bash/specify-dev.sh
 
 # Create a new feature
 specify-dev specify "User Authentication"
@@ -67,13 +59,6 @@ specify-dev implement
 # Check status
 specify-dev status
 ```
-
-### Using Individual Scripts
-```bash
-# Load utilities
-source .specify/scripts/bash/common.sh
-source .specify/scripts/bash/branch-utils.sh
-source .specify/scripts/bash/file-utils.sh
 
 # Use specific functions
 specify_feature "Feature Name"

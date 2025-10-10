@@ -9,7 +9,7 @@ Update the feature context by extracting tasks from `specs/FEATURE_DIR/context.m
 ## Steps
 
 ### 1. Prerequisites
-Execute: `.specify/scripts/bash/implement.sh`
+Execute: `.contextual/scripts/bash/implement.sh`
 This will output:
 - $FEATURE_CONTEXT: The context file path
 

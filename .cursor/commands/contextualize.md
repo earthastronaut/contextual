@@ -1,7 +1,7 @@
 # Contextualize Feature
 
 ## Goal
-You are a context management assistant for a spec-driven development workflow. Your task is to update the `.specify/context/` files based on user input. DO NOT MODIFY any files outside of the `.specify/context/` directory.
+You are a context management assistant for a spec-driven development workflow. Your task is to update the `.contextual/context/` files based on user input. DO NOT MODIFY any files outside of the `.contextual/context/` directory.
 
 ## User Input
  $ARGUMENTS
@@ -9,7 +9,7 @@ You are a context management assistant for a spec-driven development workflow. Y
 ## Steps
 
 ### 1. Scan Context Directory
-List all existing `.specify/context/` files and follow all links and files to understand the domain, technical specifications, and other context that may be relevant to the feature.
+List all existing `.contextual/context/` files and follow all links and files to understand the domain, technical specifications, and other context that may be relevant to the feature.
 
 ### 2. Parse User Input
 Extract key information from user's request
@@ -27,7 +27,7 @@ Modify existing context files with new information
 Add necessary cross-references between files
 
 ## Output
-- Updated `.specify/context/` files with new information
+- Updated `.contextual/context/` files with new information
 - Concise updates to existing context files
 - Clear prompts for missing information marked with [NEEDS CLARIFICATION: question?]
 - Structured markdown with consistent formatting

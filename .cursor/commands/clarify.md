@@ -9,7 +9,7 @@ Update the feature context. Identify and resolve ambiguous areas in the feature 
 ## Steps
 
 ### 1. Prerequisites
-Execute: `.specify/scripts/bash/clarify.sh`
+Execute: `.contextual/scripts/bash/clarify.sh`
 This will output:
 - $FEATURE_CONTEXT: The context file path
 

@@ -21,7 +21,7 @@ Analyze the user input and make sure it is valid. Must be longer than 30 charact
 From the user input, generate a concise (less than 30 characters) and santized kabab-case name and put into ${FEATURE_INPUT}.
 
 ### 3. Create Structure and Get Feature Name
-Execute: `.specify/scripts/bash/specify.sh "${FEATURE_INPUT}"`
+Execute: `.contextual/scripts/bash/specify.sh "${FEATURE_INPUT}"`
 This will output:
 - ${CONTEXT_ROOT}: The root context file.
 - ${FEATURE}: The sanitized feature name
