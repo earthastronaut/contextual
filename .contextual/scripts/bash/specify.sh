@@ -74,7 +74,7 @@ specify_feature() {
     # Create feature directory and context file
     local feature_dir="$SPECS_DIR/$numbered_feature_name"
     local context_file="$feature_dir/context.md"
-    local template_file="$SPECIFY_ROOT/templates/context.md"
+    local template_file="$CONTEXTUAL_ROOT/templates/context.md"
     
     # Create feature directory
     mkdir -p "$feature_dir"

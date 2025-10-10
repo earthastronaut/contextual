@@ -31,6 +31,8 @@ CONTEXTUAL_ROOT="${CONTEXTUAL_CONTEXTUAL_ROOT:-.contextual}"
 CONTEXT_DIR="${CONTEXTUAL_CONTEXT_DIR:-$CONTEXTUAL_ROOT/context}"
 CONTEXT_ROOT="${CONTEXTUAL_CONTEXT_ROOT:-$CONTEXT_DIR/README.md}"
 SPECS_DIR="${CONTEXTUAL_SPECS_DIR:-specs}"
+MAIN_BRANCH="${CONTEXTUAL_MAIN_BRANCH:-main}"
+MERGE_TEMPLATE="${CONTEXTUAL_MERGE_TEMPLATE:-Merge \{FEATURE_BRANCH\}: \{DESCRIPTION\}}"
 
 # Function to get all context files
 get_context_files() {
@@ -95,6 +97,7 @@ export GIT_REPO_ROOT
 export CONTEXTUAL_ROOT
 export CONTEXT_DIR
 export SPECS_DIR
+export MAIN_BRANCH
 export CONTEXT
 export -f get_context_files
 export -f refresh_context
