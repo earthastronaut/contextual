@@ -21,7 +21,7 @@ git clone https://github.com/contextual/contextual.git
 cd contextual
 
 # Install into your project
-./contextual install --project-root /path/to/your/project
+./contextual install /path/to/your/project
 ```
 
 ## 🛠️ Usage
@@ -36,20 +36,20 @@ contextual help
 contextual version
 
 # Install contextual tools into a project
-contextual install --project-root /path/to/project
+contextual install /path/to/project
 
 # Update your project with new features
-contextual update --project-root /path/to/your/project
+contextual update /path/to/your/project
 ```
 
 ### Installation Options
 
 ```bash
 # Install with custom agent (default: cursor)
-contextual install --project-root /path/to/project --agent cursor
+contextual install /path/to/project --agent cursor
 
 # Install with custom contextual root directory
-contextual install --project-root /path/to/project --contextual-root .dev-tools
+contextual install /path/to/project --contextual-root .dev-tools
 ```
 
 ## 🔄 Development Workflow

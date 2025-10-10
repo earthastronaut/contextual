@@ -34,7 +34,7 @@ show_help() {
 Contextual Development Tools CLI v$CONTEXTUAL_VERSION
 
 USAGE:
-    contextual <command> [options]
+    contextual <command> [PROJECT_ROOT] [options]
 
 COMMANDS:
     install       Install contextual development tools into a project
@@ -45,7 +45,8 @@ COMMANDS:
     version       Show version information
 
 EXAMPLES:
-    contextual install --project-root /path/to/project
+    contextual install /path/to/project
+    contextual install /path/to/project --agent cursor
     contextual run-tests --verbose
     contextual test --list
     contextual help

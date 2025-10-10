@@ -8,7 +8,7 @@ set -euo pipefail
 # Test configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-INSTALL_SCRIPT="$PROJECT_ROOT/install.sh"
+INSTALL_SCRIPT="$PROJECT_ROOT/scripts/install.sh"
 TEST_DIR="$PROJECT_ROOT/test-scenarios"
 
 # Colors for test output
@@ -158,7 +158,7 @@ test_new_project() {
     
     # Run installation with output capture for debugging
     local install_output
-    if install_output=$("$INSTALL_SCRIPT" --project-root "$project_dir" 2>&1); then
+    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" 2>&1); then
         # Test directory structure
         test_directory_structure "$test_name" "$project_dir"
         
@@ -193,7 +193,7 @@ test_existing_project() {
     
     # Run installation with output capture for debugging
     local install_output
-    if install_output=$("$INSTALL_SCRIPT" --project-root "$project_dir" 2>&1); then
+    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" 2>&1); then
         # Test that existing context was preserved
         if [[ -f "$project_dir/.contextual/context/existing.md" ]]; then
             print_test_result "$test_name" "PASS" "Existing context file preserved"
@@ -226,7 +226,7 @@ test_custom_contextual_root() {
     
     # Run installation with custom contextual root
     local install_output
-    if install_output=$("$INSTALL_SCRIPT" --project-root "$project_dir" --contextual-root "$custom_root" 2>&1); then
+    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" --contextual-root "$custom_root" 2>&1); then
         # Test that custom root was used
         if [[ -d "$project_dir/$custom_root" ]]; then
             print_test_result "$test_name" "PASS" "Custom contextual root directory created"
@@ -258,7 +258,7 @@ test_different_agents() {
     
     # Test cursor agent (default)
     local install_output
-    if install_output=$("$INSTALL_SCRIPT" --project-root "$project_dir" --agent cursor 2>&1); then
+    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" --agent cursor 2>&1); then
         if [[ -d "$project_dir/.cursor/commands" ]]; then
             print_test_result "$test_name" "PASS" "Cursor agent structure created"
         else

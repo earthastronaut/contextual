@@ -7,7 +7,7 @@ set -euo pipefail
 
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONTEXTUAL_ROOT="${SCRIPT_DIR}/.contextual"
+CONTEXTUAL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)/.contextual"
 DEFAULT_AGENT="cursor"
 DEFAULT_CONTEXTUAL_ROOT=".contextual"
 
@@ -43,20 +43,22 @@ print_error() {
 # Function to show usage
 show_usage() {
     cat << EOF
-Usage: $0 [OPTIONS]
+Usage: $0 [PROJECT_ROOT] [OPTIONS]
 
 Install contextual development tools into a project directory.
 
+ARGUMENTS:
+    PROJECT_ROOT            Target project directory (optional)
+
 OPTIONS:
-    --project-root PATH     Target project directory (required)
     --agent AGENT          AI agent to configure (default: cursor)
     --contextual-root PATH Contextual root directory (default: .contextual)
     --help                 Show this help message
 
 EXAMPLES:
-    $0 --project-root /path/to/project
-    $0 --project-root /path/to/project --agent cursor
-    $0 --project-root /path/to/project --contextual-root .dev-tools
+    $0 /path/to/project
+    $0 /path/to/project --agent cursor
+    $0 /path/to/project --contextual-root .dev-tools
 
 EOF
 }
@@ -64,9 +66,11 @@ EOF
 # Function to validate arguments
 validate_arguments() {
     if [[ -z "$PROJECT_ROOT" ]]; then
-        print_error "Project root is required. Use --project-root or --help for usage."
+        print_error "Project root is required. Provide PROJECT_ROOT as first argument or --help for usage."
         exit 1
     fi
+    
+    # Note: PROJECT_ROOT directory will be created if it doesn't exist
     
     if [[ ! -d "$CONTEXTUAL_ROOT" ]]; then
         print_error "Contextual root directory not found: $CONTEXTUAL_ROOT"
@@ -269,27 +273,50 @@ install_contextual() {
     fi
 }
 
-# Parse command line arguments
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --project-root)
-            PROJECT_ROOT="$2"
-            shift 2
-            ;;
+# Handle positional arguments first
+flag_args=()
+if [[ $# -gt 0 ]]; then
+    # Check if first argument is a flag
+    if [[ "$1" =~ ^-- ]]; then
+        # No positional arguments, process all as flags
+        flag_args=("$@")
+    else
+        # First argument is positional (project root)
+        PROJECT_ROOT="$1"
+        shift
+        # Check for additional positional arguments
+        additional_positional=()
+        while [[ $# -gt 0 && ! "$1" =~ ^-- ]]; do
+            additional_positional+=("$1")
+            shift
+        done
+        if [[ ${#additional_positional[@]} -gt 0 ]]; then
+            print_error "Multiple positional arguments provided. Only the first one will be used as project root."
+            print_error "Additional arguments: ${additional_positional[*]}"
+            exit 1
+        fi
+        # Remaining arguments are flags
+        flag_args=("$@")
+    fi
+fi
+
+# Parse flag arguments
+while [[ ${#flag_args[@]} -gt 0 ]]; do
+    case "${flag_args[0]}" in
         --agent)
-            AGENT="$2"
-            shift 2
+            AGENT="${flag_args[1]}"
+            flag_args=("${flag_args[@]:2}")
             ;;
         --contextual-root)
-            CONTEXTUAL_TARGET="$2"
-            shift 2
+            CONTEXTUAL_TARGET="${flag_args[1]}"
+            flag_args=("${flag_args[@]:2}")
             ;;
         --help)
             show_usage
             exit 0
             ;;
         *)
-            print_error "Unknown option: $1"
+            print_error "Unknown option: ${flag_args[0]}"
             show_usage
             exit 1
             ;;

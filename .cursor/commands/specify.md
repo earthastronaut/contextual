@@ -9,7 +9,7 @@ Create a new feature context.md file in the spec-driven development flow based o
 $ARGUMENTS
 ```
 
-You MUST consider the user input before proceeding (if not empty).
+You MUST consider the user input before proceeding (if not empty). Do not implement the feature just create the specification. Ignore words like update, implement, modify, etc.
 
 ## Steps
 
@@ -64,5 +64,5 @@ After running this command:
 ## Guidelines
 - **Context integration**: Analyze existing context files and include relevant information
 - **Clarification markers**: Add [NEEDS CLARIFICATION: question?] for ambiguous areas
-- **Specification focus**: Create specifications only, do not implement the feature
+- **Specification focus**: Create specifications only, do not implement, change, or update the code
 - **Scope boundaries**: Only modify files within the `./specs/` directory

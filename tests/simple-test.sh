@@ -8,7 +8,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-INSTALL_SCRIPT="$PROJECT_ROOT/install.sh"
+INSTALL_SCRIPT="$PROJECT_ROOT/scripts/install.sh"
 TEST_DIR="$PROJECT_ROOT/test-scenarios"
 
 echo "Testing install.sh script..."
@@ -27,7 +27,7 @@ echo "Test 2: New project installation"
 TEST_PROJECT="$TEST_DIR/simple-test-project"
 rm -rf "$TEST_PROJECT" 2>/dev/null || true
 
-if bash "$INSTALL_SCRIPT" --project-root "$TEST_PROJECT" >/dev/null 2>&1; then
+if bash "$INSTALL_SCRIPT" "$TEST_PROJECT" >/dev/null 2>&1; then
     echo "✓ Installation completed"
     
     # Check directory structure
@@ -67,7 +67,7 @@ rm -rf "$EXISTING_PROJECT" 2>/dev/null || true
 mkdir -p "$EXISTING_PROJECT/.contextual/context"
 echo "# Existing Context" > "$EXISTING_PROJECT/.contextual/context/existing.md"
 
-if bash "$INSTALL_SCRIPT" --project-root "$EXISTING_PROJECT" >/dev/null 2>&1; then
+if bash "$INSTALL_SCRIPT" "$EXISTING_PROJECT" >/dev/null 2>&1; then
     echo "✓ Update completed"
     
     # Check that existing context was preserved
@@ -89,7 +89,7 @@ echo "Test 4: Custom contextual root"
 CUSTOM_PROJECT="$TEST_DIR/simple-custom-project"
 rm -rf "$CUSTOM_PROJECT" 2>/dev/null || true
 
-if bash "$INSTALL_SCRIPT" --project-root "$CUSTOM_PROJECT" --contextual-root ".dev-tools" >/dev/null 2>&1; then
+if bash "$INSTALL_SCRIPT" "$CUSTOM_PROJECT" --contextual-root ".dev-tools" >/dev/null 2>&1; then
     echo "✓ Custom installation completed"
     
     if [[ -d "$CUSTOM_PROJECT/.dev-tools" ]]; then
