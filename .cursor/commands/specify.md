@@ -5,7 +5,11 @@ Create a new feature context.md file in the spec-driven development flow based o
 
 ## User Input
 
- $ARGUMENTS
+```text
+$ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty).
 
 ## Steps
 

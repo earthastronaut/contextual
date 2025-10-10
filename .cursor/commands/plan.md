@@ -4,7 +4,12 @@
 Update the $FEATURE_CONTEXT file to move all tasks into a linked file `$FEATURE_DIR/plan.md` which is a detailed implementation plan with tasks for the feature and remove any tasks from the $FEATURE_CONTEXT file.
 
 ## User Input
- $ARGUMENTS
+
+```text
+$ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty).
 
 ## Steps
 

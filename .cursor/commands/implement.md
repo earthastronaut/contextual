@@ -4,7 +4,12 @@
 Implement the feature based on the context and all linked files.
 
 ## User Input
- $ARGUMENTS
+ 
+```text
+$ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty).
 
 ## Steps
 

@@ -4,9 +4,10 @@
 Update the feature context by extracting tasks from `specs/FEATURE_DIR/context.md` and creating a dedicated `specs/FEATURE_DIR/tasks.md` file. Remove tasks from the context file and replace with a reference link to the tasks file. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
 
 ## User Input
- $ARGUMENTS
 
-## Steps
+```text
+$ARGUMENTS
+```
 
 ### 1. Prerequisites
 Execute: `.contextual/scripts/bash/implement.sh`

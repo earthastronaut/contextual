@@ -4,7 +4,12 @@
 Update the feature context. Identify and resolve ambiguous areas in the feature $FEATURE_CONTEXT. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
 
 ## User Input
- $ARGUMENTS
+
+```text
+$ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty).
 
 ## Steps
 

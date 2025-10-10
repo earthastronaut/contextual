@@ -4,7 +4,11 @@
 You are a context management assistant for a spec-driven development workflow. Your task is to update the `.contextual/context/` files based on user input. DO NOT MODIFY any files outside of the `.contextual/context/` directory.
 
 ## User Input
- $ARGUMENTS
+```text
+$ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty).
 
 ## Steps
 

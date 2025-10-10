@@ -4,7 +4,12 @@
 Update the feature context. Do a deep analysis of the current project structure and create a summary of the project structure, key files, and technologies used. Add this to the `$FEATURE_DIR/analyzed.md` file and reference directly in the `$FEATURE_CONTEXT` file. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
 
 ## User Input
+
+```text
 $ARGUMENTS
+```
+
+You MUST consider the user input before proceeding (if not empty). This may include the folder to analyze.
 
 ## Steps
 
@@ -14,6 +19,14 @@ This will output:
 - $SPECIFY_DIR: The specify directory path
 - $PROJECT_ROOT: The project root directory
 - $FEATURE_CONTEXT: The context file path
+
+### 2. Decide on folder to analyze
+
+Populate a variable named ANALYSIS_INPUT_DIRECTORY with the folder to analyze. If the user input is not empty, use it as the folder to analyze. If the user input is empty, use the PROJECT_ROOT as the folder to analyze.
+
+### 3. Analyze Project Structure
+- Execute: `.contextual/scripts/bash/folder-analyzer.sh --input $ANALYSIS_INPUT_DIRECTORY --output $FEATURE_DIR/analyzed.md`
+This will output: files and directories
 
 ### 2. Analyze Project Structure
 - Execute: `.contextual/scripts/bash/folder-analyzer.sh --input $PROJECT_ROOT --output $FEATURE_DIR/analyzed.md`
