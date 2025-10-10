@@ -74,14 +74,12 @@ validate_environment() {
 execute_merge() {
     # Get current feature branch
     local feature_branch=$(git branch --show-current)
-    local feature_name=$(get_current_feature_display_name)
-
-    # default commit message if COMMIT_MESSAGE is empty
-    local commit_message=$(
-        [ "$COMMIT_MESSAGE" == "" ] 
-        && echo "Merge $feature_branch: $feature_name" 
-        || echo "$COMMIT_MESSAGE"
-    )
+    
+    # Use provided commit message or create default
+    local commit_message="$COMMIT_MESSAGE"
+    if [[ -z "$commit_message" ]]; then
+        commit_message="Merge $feature_branch: feature implementation"
+    fi
 
     print_info "Starting merge process..."
     print_info "  Feature Branch: $feature_branch"
