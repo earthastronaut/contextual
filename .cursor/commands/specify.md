@@ -58,8 +58,6 @@ After running this command:
 5. Use `/implement` to begin feature implementation
 
 ## Guidelines
-- **Input validation**: Ensure user input is longer than 30 characters and contains essential feature information
-- **Feature naming**: Generate concise, sanitized kebab-case names for features
 - **Context integration**: Analyze existing context files and include relevant information
 - **Clarification markers**: Add [NEEDS CLARIFICATION: question?] for ambiguous areas
 - **Specification focus**: Create specifications only, do not implement the feature
