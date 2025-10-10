@@ -38,6 +38,7 @@ USAGE:
 
 COMMANDS:
     install       Install contextual development tools into a project
+    update        Update contextual development tools in a project
     run-tests     Run all tests for contextual development tools
     test          Alias for run-tests
     help          Show this help message
@@ -128,6 +129,9 @@ main() {
     
     case "$command" in
         "install")
+            execute_script "install.sh" "$@"
+            ;;
+        "update")
             execute_script "install.sh" "$@"
             ;;
         "run-tests"|"test")
