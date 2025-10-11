@@ -20,8 +20,14 @@
 git clone https://github.com/contextual/contextual.git
 cd contextual
 
-# Install into your project
+# Install .contextual and commands into your project
 ./contextual install /path/to/your/project
+
+# Start a new feature
+# /specify add contextualize
+# /implement
+# /commit
+# /merge
 ```
 
 ## 🛠️ Usage
