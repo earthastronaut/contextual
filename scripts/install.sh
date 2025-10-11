@@ -8,8 +8,33 @@ set -euo pipefail
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONTEXTUAL_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)/.contextual"
+COMMANDS_SOURCE="$(cd "$SCRIPT_DIR/.." && pwd)/commands"
 DEFAULT_AGENT="cursor"
 DEFAULT_CONTEXTUAL_ROOT=".contextual"
+
+# Supported agents (space-separated for compatibility with bash 3.2)
+SUPPORTED_AGENTS="copilot claude gemini cursor qwen opencode codex windsurf kilocode auggie codebuddy roo q"
+
+# Function to get agent folder path
+get_agent_folder() {
+    local agent="$1"
+    case "$agent" in
+        "copilot") echo ".github/copilot/commands" ;;
+        "claude") echo ".claude/commands" ;;
+        "gemini") echo ".gemini/commands" ;;
+        "cursor") echo ".cursor/commands" ;;
+        "qwen") echo ".qwen/commands" ;;
+        "opencode") echo ".opencode/commands" ;;
+        "codex") echo ".codex/commands" ;;
+        "windsurf") echo ".windsurf/commands" ;;
+        "kilocode") echo ".kilocode/commands" ;;
+        "auggie") echo ".augment/commands" ;;
+        "codebuddy") echo ".codebuddy/commands" ;;
+        "roo") echo ".roo/commands" ;;
+        "q") echo ".amazonq/commands" ;;
+        *) echo "" ;;
+    esac
+}
 
 # Colors for output
 RED='\033[0;31m'
@@ -52,12 +77,27 @@ ARGUMENTS:
 
 OPTIONS:
     --agent AGENT          AI agent to configure (default: cursor)
+                          Supported agents:
+                            - cursor      (Cursor IDE)
+                            - claude      (Claude Code)
+                            - gemini      (Gemini CLI)
+                            - copilot     (GitHub Copilot)
+                            - qwen        (Qwen Code)
+                            - opencode    (OpenCode)
+                            - codex       (Codex CLI)
+                            - windsurf    (Windsurf IDE)
+                            - kilocode    (Kilo Code IDE)
+                            - auggie      (Auggie CLI)
+                            - codebuddy   (CodeBuddy)
+                            - roo         (Roo Code IDE)
+                            - q           (Amazon Q Developer CLI)
     --contextual-root PATH Contextual root directory (default: .contextual)
     --help                 Show this help message
 
 EXAMPLES:
     $0 /path/to/project
     $0 /path/to/project --agent cursor
+    $0 /path/to/project --agent claude
     $0 /path/to/project --contextual-root .dev-tools
 
 EOF
@@ -70,11 +110,33 @@ validate_arguments() {
         exit 1
     fi
     
+    # Validate agent
+    local valid_agent=false
+    for supported_agent in $SUPPORTED_AGENTS; do
+        if [[ "$AGENT" == "$supported_agent" ]]; then
+            valid_agent=true
+            break
+        fi
+    done
+    
+    if [[ "$valid_agent" == "false" ]]; then
+        print_error "Unsupported agent: $AGENT"
+        print_error "Supported agents: $SUPPORTED_AGENTS"
+        exit 1
+    fi
+    
     # Note: PROJECT_ROOT directory will be created if it doesn't exist
     
     if [[ ! -d "$CONTEXTUAL_ROOT" ]]; then
         print_error "Contextual root directory not found: $CONTEXTUAL_ROOT"
         print_error "Make sure you're running this script from the contextual project root."
+        exit 1
+    fi
+    
+    # Validate commands source directory exists
+    if [[ ! -d "$COMMANDS_SOURCE" ]]; then
+        print_error "Commands source directory not found: $COMMANDS_SOURCE"
+        print_error "Make sure the commands directory exists in the contextual project root."
         exit 1
     fi
 }
@@ -108,24 +170,24 @@ setup_agent_structure() {
     local project_dir="$1"
     local agent="$2"
     
-    case "$agent" in
-        "cursor")
-            local cursor_dir="$project_dir/.cursor"
-            local commands_dir="$cursor_dir/commands"
-            
-            print_info "Setting up Cursor agent structure..."
-            
-            if [[ ! -d "$commands_dir" ]]; then
-                mkdir -p "$commands_dir"
-                print_success "Created .cursor/commands directory"
-            else
-                print_info ".cursor/commands directory already exists"
-            fi
-            ;;
-        *)
-            print_warning "Unknown agent: $agent. Skipping agent-specific setup."
-            ;;
-    esac
+    # Get agent-specific folder from configuration
+    local agent_folder="$(get_agent_folder "$agent")"
+    
+    if [[ -z "$agent_folder" ]]; then
+        print_warning "Unknown agent: $agent. Skipping agent-specific setup."
+        return 1
+    fi
+    
+    local commands_dir="$project_dir/$agent_folder"
+    
+    print_info "Setting up $agent agent structure..."
+    
+    if [[ ! -d "$commands_dir" ]]; then
+        mkdir -p "$commands_dir"
+        print_success "Created $agent_folder directory"
+    else
+        print_info "$agent_folder directory already exists"
+    fi
 }
 
 # Function to copy contextual files with selective overwrite
@@ -172,24 +234,37 @@ copy_contextual_files() {
         print_success "README.md copied"
     fi
     
-    # Copy config.example if it exists
-    if [[ -f "$CONTEXTUAL_ROOT/config.example" ]]; then
-        print_info "Copying config.example..."
-        cp "$CONTEXTUAL_ROOT/config.example" "$target_dir/"
-        print_success "config.example copied"
+    # Copy config if it exists
+    if [[ -f "$CONTEXTUAL_ROOT/config" ]]; then
+        print_info "Copying config..."
+        cp "$CONTEXTUAL_ROOT/config" "$target_dir/"
+        print_success "config copied"
     fi
 }
 
-# Function to copy Cursor command files
-copy_cursor_commands() {
+# Function to copy agent command files
+copy_agent_commands() {
     local project_dir="$1"
-    local cursor_dir="$project_dir/.cursor"
-    local commands_dir="$cursor_dir/commands"
+    local agent="$2"
+    
+    # Get agent-specific folder from configuration
+    local agent_folder="$(get_agent_folder "$agent")"
+    
+    if [[ -z "$agent_folder" ]]; then
+        print_warning "Unknown agent: $agent. Skipping command copy."
+        return 1
+    fi
+    
+    local commands_dir="$project_dir/$agent_folder"
     
     if [[ -d "$commands_dir" ]]; then
-        print_info "Copying Cursor command files..."
-        cp "$CONTEXTUAL_ROOT/../.cursor/commands"/*.md "$commands_dir/" 2>/dev/null || true
-        print_success "Cursor command files copied"
+        print_info "Copying $agent command files from $COMMANDS_SOURCE..."
+        if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
+            cp "$COMMANDS_SOURCE"/*.md "$commands_dir/" 2>/dev/null || true
+            print_success "$agent command files copied"
+        else
+            print_warning "No command files found in $COMMANDS_SOURCE"
+        fi
     fi
 }
 
@@ -219,14 +294,13 @@ validate_installation() {
     done
     
     # Check agent-specific structure
-    case "$agent" in
-        "cursor")
-            if [[ ! -d "$project_dir/.cursor/commands" ]]; then
-                print_error "Cursor commands directory not found: $project_dir/.cursor/commands"
-                return 1
-            fi
-            ;;
-    esac
+    local agent_folder="$(get_agent_folder "$agent")"
+    if [[ -n "$agent_folder" ]]; then
+        if [[ ! -d "$project_dir/$agent_folder" ]]; then
+            print_error "$agent commands directory not found: $project_dir/$agent_folder"
+            return 1
+        fi
+    fi
     
     print_success "Installation validation passed"
     return 0
@@ -252,21 +326,25 @@ install_contextual() {
     # Copy contextual files
     copy_contextual_files "$project_dir" "$contextual_target"
     
-    # Copy agent-specific files
-    case "$agent" in
-        "cursor")
-            copy_cursor_commands "$project_dir"
-            ;;
-    esac
+    # Copy agent-specific command files
+    copy_agent_commands "$project_dir" "$agent"
     
     # Validate installation
     if validate_installation "$project_dir" "$contextual_target" "$agent"; then
         print_success "Installation completed successfully!"
         print_info "You can now use contextual development tools in your project."
+        print_info ""
         print_info "Contextual directory: $project_dir/$contextual_target"
-        if [[ "$agent" == "cursor" ]]; then
-            print_info "Cursor commands: $project_dir/.cursor/commands"
+        
+        local agent_folder="$(get_agent_folder "$agent")"
+        if [[ -n "$agent_folder" ]]; then
+            print_info "$agent commands: $project_dir/$agent_folder"
         fi
+        
+        print_info ""
+        print_info "Configuration:"
+        print_info "  Config file: $project_dir/$contextual_target/config"
+        print_info "  Edit the config file to customize settings"
     else
         print_error "Installation validation failed. Please check the output above."
         exit 1

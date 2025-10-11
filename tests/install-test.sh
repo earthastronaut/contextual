@@ -165,7 +165,7 @@ test_new_project() {
         
         # Test specific files
         test_file_exists "$test_name" "$project_dir/.contextual/README.md"
-        test_file_exists "$test_name" "$project_dir/.contextual/config.example"
+        test_file_exists "$test_name" "$project_dir/.contextual/config"
         test_file_exists "$test_name" "$project_dir/.cursor/commands/specify.md"
         test_file_exists "$test_name" "$project_dir/.cursor/commands/implement.md"
         

@@ -24,15 +24,22 @@ load_config_overrides() {
 # Load any configuration overrides
 load_config_overrides
 
-# Configuration variables with override support
-# These can be overridden by environment variables or config file
-GIT_REPO_ROOT="${CONTEXTUAL_GIT_REPO_ROOT:-$(git rev-parse --show-toplevel 2>/dev/null || pwd)}"
-CONTEXTUAL_ROOT="${CONTEXTUAL_CONTEXTUAL_ROOT:-.contextual}"
-CONTEXT_DIR="${CONTEXTUAL_CONTEXT_DIR:-$CONTEXTUAL_ROOT/context}"
-CONTEXT_ROOT="${CONTEXTUAL_CONTEXT_ROOT:-$CONTEXT_DIR/README.md}"
-SPECS_DIR="${CONTEXTUAL_SPECS_DIR:-specs}"
-MAIN_BRANCH="${CONTEXTUAL_MAIN_BRANCH:-main}"
-MERGE_TEMPLATE="${CONTEXTUAL_MERGE_TEMPLATE:-Merge \{FEATURE_BRANCH\}: \{DESCRIPTION\}}"
+# =========================
+# Configuration variables
+# =========================
+# Calculated
+GIT_REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+# Fixed
+CONTEXTUAL_ROOT=".contextual"
+# Variable with override support
+# Priority: 1) Environment variables (CONTEXTUAL_*), 2) Config file, 3) Defaults
+CONTEXTUAL_ROOT="${CONTEXTUAL_CONTEXTUAL_ROOT:-${CONTEXTUAL_ROOT:-.contextual}}"
+SPECS_DIR="${CONTEXTUAL_SPECS_DIR:-${SPECS_DIR:-specs}}"
+MAIN_BRANCH="${CONTEXTUAL_MAIN_BRANCH:-${MAIN_BRANCH:-main}}"
+MERGE_TEMPLATE="${CONTEXTUAL_MERGE_TEMPLATE:-${MERGE_TEMPLATE:-Merge \{FEATURE_BRANCH\}: \{DESCRIPTION\}}}"
+# Calculated
+CONTEXT_DIR=$(dirname "$CONTEXTUAL_ROOT")
+# =========================
 
 # Function to get all context files
 get_context_files() {
@@ -60,35 +67,6 @@ show_config() {
     echo "  CONTEXT: $CONTEXT" >&2
 }
 
-# Function to create a sample configuration file
-create_sample_config() {
-    local config_file="${1:-.contextual/config}"
-    local config_dir=$(dirname "$config_file")
-    
-    # Create directory if it doesn't exist
-    mkdir -p "$config_dir"
-    
-    cat > "$config_file" << 'EOF'
-# Contextual Configuration File
-# Uncomment and modify the variables below to override defaults
-
-# CONTEXTUAL_ROOT="custom/.contextual"
-# CONTEXT_DIR="custom/context"
-# CONTEXT_ROOT="custom/context/README.md"
-# SPECS_DIR="custom/specs"
-# GIT_REPO_ROOT="/custom/git/root"
-
-# Note: You can also set these as environment variables:
-# export CONTEXTUAL_CONTEXTUAL_ROOT="custom/.contextual"
-# export CONTEXTUAL_CONTEXT_DIR="custom/context"
-# export CONTEXTUAL_CONTEXT_ROOT="custom/context/README.md"
-# export CONTEXTUAL_SPECS_DIR="custom/specs"
-# export CONTEXTUAL_GIT_REPO_ROOT="/custom/git/root"
-EOF
-    
-    echo "Sample configuration file created at: $config_file" >&2
-}
-
 # Initialize CONTEXT variable with all files in .contextual/context
 refresh_context
 
@@ -102,5 +80,3 @@ export CONTEXT
 export -f get_context_files
 export -f refresh_context
 export -f show_config
-export -f create_sample_config
-

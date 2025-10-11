@@ -1,0 +1,1 @@
+Cursor is use for local development and contributions to contextual itself.

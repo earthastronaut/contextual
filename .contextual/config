@@ -1,0 +1,14 @@
+# Contextual Configuration File
+# Uncomment and modify the variables below to customize settings
+
+# Global context root file
+# CONTEXT_ROOT=".contextual/context/README.md"
+
+# Specifications directory (relative to project root)
+# SPECS_DIR="./specs"
+
+# Main branch name for merges
+# MAIN_BRANCH="main"
+
+# Merge commit message template (use {FEATURE_BRANCH} and {DESCRIPTION} placeholders)
+# MERGE_TEMPLATE="Merge {FEATURE_BRANCH}: {DESCRIPTION}"

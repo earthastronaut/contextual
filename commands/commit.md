@@ -1,7 +1,5 @@
-# Manual Commit Instructions
-
-## Overview
-Analyze git status, create commit message, and commit changes.
+# Goal
+Create a commit based on current changes.
 
 ## User Input
 
@@ -9,7 +7,7 @@ Analyze git status, create commit message, and commit changes.
 $ARGUMENTS
 ```
 
-You MUST consider the user input before proceeding (if not empty).
+You MUST consider the user input before proceeding (if not empty). This may include the commit message or the files to commit.
 
 ## Steps
 
@@ -17,19 +15,13 @@ You MUST consider the user input before proceeding (if not empty).
 Check current status `git status --porcelain`
 
 ### 2. Analyze the Changes
-Look at the file paths and determine the commit type.
-- `feat:` - New features or functionality
-- `fix:` - Bug fixes
-- `docs:` - Documentation changes
-- `refactor:` - Code refactoring without behavior changes
-- `test:` - Adding or updating tests
-- `chore:` - Maintenance tasks, build changes, etc.
+Look at the file paths and determine the commit type. (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`)
 - Guidelines
     - Use directory name if changes are focused there
     - Omit scope if changes span multiple areas
     - Keep scope short and descriptive
 
-## Step 4: Create Description
+### 3. Create Description
 Based on the main files changed:
 - Keep it concise and descriptive
 - Examples:
@@ -61,6 +53,9 @@ Choose one of these methods:
 
 ### 7: Commit
 Execute: `git commit -m "{COMMIT_MESSAGE}"`
+
+## Output
+- Very concise summary of the commit
 
 ## Next Steps
 - Review the commit message
