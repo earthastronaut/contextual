@@ -19,7 +19,7 @@ specify_feature() {
     
     if [[ -z "$feature_name" ]]; then
         print_error "Feature name is required"
-        echo "Usage: specify_feature \"Feature Name\" [specs_directory]"
+        print_error "Usage: specify_feature \"Feature Name\" [specs_directory]"
         return 1
     fi
     
@@ -112,7 +112,7 @@ specify_feature() {
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     if [[ $# -eq 0 ]]; then
         print_error "Feature name is required"
-        echo "Usage: $0 \"Feature Name\" [specs_directory]"
+        print_error "Usage: $0 \"Feature Name\" [specs_directory]"
         exit 1
     fi
     

@@ -104,4 +104,3 @@ export -f refresh_context
 export -f show_config
 export -f create_sample_config
 
-echo "Configuration utilities loaded" >&2

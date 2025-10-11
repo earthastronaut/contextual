@@ -47,17 +47,9 @@ EXAMPLES:
 EOF
 }
 
-# Function to log messages
-log() {
-    echo -e "${GREEN}[INFO]${NC} $1" >&2
-}
-
+# Function to log error messages (kept for error handling)
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1" >&2
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1" >&2
 }
 
 # Function to convert absolute path to relative path
@@ -286,16 +278,10 @@ if ! [[ "$MAX_DEPTH" =~ ^[0-9]+$ ]] || [[ "$MAX_DEPTH" -lt 0 ]]; then
     exit 1
 fi
 
-log "Analyzing directory: $INPUT_DIR"
-log "Root directory for relative paths: $ROOT_DIR"
-log "Max depth: $MAX_DEPTH"
-log "Skip dotfiles: $SKIP_DOTFILES"
 
 # Generate and output the report
 if [[ -n "$OUTPUT_FILE" ]]; then
-    log "Writing report to: $OUTPUT_FILE"
     generate_report "$INPUT_DIR" > "$OUTPUT_FILE"
-    log "Report generated successfully!"
 else
     generate_report "$INPUT_DIR"
 fi

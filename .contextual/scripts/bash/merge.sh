@@ -8,10 +8,6 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils/config-utils.sh"
 source "$SCRIPT_DIR/utils/print-utils.sh"
 
-# Default values
-MAIN_BRANCH="main"
-COMMIT_MESSAGE=""
-
 # Function to show help
 show_merge_help() {
     print_header "Merge Script Help"
@@ -81,11 +77,6 @@ execute_merge() {
         commit_message="Merge $feature_branch: feature implementation"
     fi
 
-    print_info "Starting merge process..."
-    print_info "  Feature Branch: $feature_branch"
-    print_info "  Main Branch: $MAIN_BRANCH"
-    print_info "  Commit Message: $commit_message"
-
     # Checkout main branch
     if ! git checkout "$MAIN_BRANCH"; then
         print_error "Failed to checkout main branch: $MAIN_BRANCH"
@@ -105,7 +96,6 @@ execute_merge() {
         return 1
     fi
     
-    print_success "Feature branch $feature_branch has been merged into $MAIN_BRANCH!"
     return 0
 }
 

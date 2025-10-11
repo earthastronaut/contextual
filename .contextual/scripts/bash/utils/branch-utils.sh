@@ -112,5 +112,3 @@ export -f is_feature_branch
 export -f get_feature_dir
 export -f get_context_file
 export -f validate_feature_setup
-
-echo "Branch utilities loaded" >&2

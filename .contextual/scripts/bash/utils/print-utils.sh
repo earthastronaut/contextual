@@ -39,5 +39,3 @@ export -f print_success
 export -f print_error
 export -f print_warning
 export -f print_info
-
-echo "Print utilities loaded" >&2

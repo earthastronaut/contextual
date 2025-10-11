@@ -46,4 +46,3 @@ export -f check_git_repo
 export -f check_project_root
 export -f validate_environment
 
-echo "Environment utilities loaded" >&2
