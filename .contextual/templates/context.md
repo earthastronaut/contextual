@@ -1,29 +1,24 @@
-# Feature: {{FEATURE_NAME}}
+# Overview
+What problem does this solve and what is the proposed solution? (2-3 sentences)
 
-## Overview
-Brief description of the feature
+# Scope
+What changes, what doesn't, and what's required?
+- **Changes**: Specific files/components to modify
+- **Requirements**: Concrete deliverables (be specific and measurable)
+- **Boundaries**: What explicitly won't change
+- **Dependencies**: New packages or integrations if any
 
-## Requirements
-- Requirement 1
-- Requirement 2
-- Requirement 3
+# Solution
+How will this be built and verified?
+- **Approach**: Key architectural decisions or design patterns
+- **Challenges**: Known constraints or technical considerations
+- **Validation**: How to verify it works correctly
+- **References**: Links to plans or external resources if needed
 
-## Technical Specifications
-- Technology stack changes if any
-- Architecture decisions changes if any
-- Dependencies changes if any
+# Tasks
+Specify the tasks to be completed.
 
-## Acceptance Criteria
-- Criterion 1
-- Criterion 2
-- Criterion 3
-
-## Implementation Notes
-- Any specific implementation details
-- Known challenges
-- References to external resources
-
-## Tasks
-- [ ] Task 1
-- [ ] Task 2
-- [ ] Task 3
+## Phase 1: description about this section
+- [ ] task 1
+- [ ] task 2
+- [ ] task 3

@@ -1,68 +1,52 @@
-# Specify New Feature
+# Goal
+Create a new feature context.md file in the spec-driven development flow based on user input. DO NOT MODIFY source code - only files within ${SPECS_DIR} directory. DO NOT IMPLEMENT THE FEATURE - ONLY CREATE THE SPECIFICATION.
 
-## Goal
-Create a new feature context.md file in the spec-driven development flow based on the user input. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION AND INSTRUCTIONS.
-
-## User Input
+# User Input
 
 ```text
 $ARGUMENTS
 ```
 
-You MUST consider the user input before proceeding (if not empty). Do not implement the feature just create the specification. Ignore words like update, implement, modify, etc.
+You MUST consider the user input before proceeding (if not empty). Do not implement the feature - just create the specification. Ignore action words like update, implement, modify, etc. - focus on WHAT needs to be specified.
 
-## Steps
+# Steps
 
-### 1. Validate User Input
+## 1. Validate & Generate Feature Name
+Analyze the user input to ensure it contains sufficient detail. From the input, generate a concise (less than 30 characters) sanitized kebab-case name and store in ${FEATURE_INPUT}.
 
-Analyze the user input and make sure it is valid. Must be longer than 30 characters.
-- **Feature Name & Description**: What the feature does and its purpose
-- **User Stories**: Who uses it and what they want to accomplish  
-- **Technical Details**: Technology stack, integrations, performance needs
-- **User Experience**: UI/UX elements, workflows, and interactions
-
-### 2. Generate Feature Input
-From the user input, generate a concise (less than 30 characters) and santized kabab-case name and put into ${FEATURE_INPUT}.
-
-### 3. Create Structure and Get Feature Name
+## 2. Create Structure
 Execute: `.contextual/scripts/bash/specify.sh "${FEATURE_INPUT}"`
-This will output:
-- ${CONTEXT_ROOT}: The root context file.
-- ${FEATURE}: The sanitized feature name
-- ${FEATURE_BRANCH}: The created branch name
-- ${FEATURE_DIR}: The feature directory path
-- ${FEATURE_CONTEXT}: The context file path
+This outputs:
+- ${CONTEXT_ROOT}: Root context file
+- ${FEATURE}: Sanitized feature name
+- ${FEATURE_BRANCH}: Created branch name
+- ${FEATURE_DIR}: Feature directory path
+- ${FEATURE_CONTEXT}: Context file path
 
-### 4. Analyze Context
-READ THROUGH THE ${CONTEXT_ROOT} file to understand the context. For each link in the file:
-- Decide from the user input if this file should be included.
-- If it should be included, read the file.
+## 3. Gather Context (Conditional)
+Read ${FEATURE_CONTEXT} to understand the required specification structure.
 
-### 5. Update Specification
-UPDATE THE ${FEATURE_CONTEXT} file with the following information:
+IF user input lacks technical detail or context:
+- Read ${CONTEXT_ROOT} to understand project context
+- Review linked files relevant to the feature
+- Use this information to enrich the specification
 
-1. **Structure**: Read the current ${FEATURE_CONTEXT} file and understand the structure.
-1. **Update Specification**: Update the ${FEATURE_CONTEXT} file sections based on user input and context. Keep it concise and to the point with the key information.
-2. **Analyze**: Analyze and put [NEEDS CLARIFICATION: question?] for anything that is not clear
-3. **Verify clarifications**: Check spec has `## Clarifications` section or user override
+### 4. Write Specification
+Update ${FEATURE_CONTEXT} following it's structure.
 
-## Output
-- New feature directory structure: ${FEATURE_DIR}
-- Initial ${FEATURE_CONTEXT} file with feature specification
-- Feature branch created: ${FEATURE_BRANCH}
-- Global context analysis integrated into specification
-- [NEEDS CLARIFICATION: question?] markers for ambiguous areas
+Add [NEEDS CLARIFICATION: question?] markers for any ambiguous areas. Don't make up answers - ask questions.
+
+## Quality Guidelines
+- Keep each section distinct with no duplicate information across sections, cross-reference where needed.
+- Be specific and measurable in requirements and acceptance criteria
+- Make tasks actionable implementation steps, not requirement restatements
+- Focus on key information - be concise and to the point
 
 ## Next Steps
-After running this command:
-1. Review the generated context.md file for completeness
-2. Use `/clarify` to resolve any [NEEDS CLARIFICATION: question?] markers
-3. Use `/analyze` to examine project structure if needed
-4. Use `/plan` to create detailed implementation plan
-5. Use `/implement` to begin feature implementation
+- (optional) `/analyze` to do deeper analysis
+- (optional) `/clarify` to resolve markers
+- (optional) `/plan` for implementation details
+- `/implement` to implement tasks from the spec
+- `/commit` to commit the changes
+- `/merge` to merge the changes into the main branch
 
-## Guidelines
-- **Context integration**: Analyze existing context files and include relevant information
-- **Clarification markers**: Add [NEEDS CLARIFICATION: question?] for ambiguous areas
-- **Specification focus**: Create specifications only, do not implement, change, or update the code
-- **Scope boundaries**: Only modify files within the `./specs/` directory
