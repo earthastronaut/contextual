@@ -60,7 +60,7 @@ get_feature_dir() {
 }
 
 # Function to get context file path
-get_context_file() {
+get_feature_context_file() {
     local feature_dir=$(get_feature_dir)
     if [[ -n "$feature_dir" ]]; then
         echo "$feature_dir/context.md"
@@ -110,5 +110,5 @@ export -f get_current_feature_name
 export -f get_current_feature_display_name
 export -f is_feature_branch
 export -f get_feature_dir
-export -f get_context_file
+export -f get_feature_context_file
 export -f validate_feature_setup

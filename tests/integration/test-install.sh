@@ -1,13 +1,15 @@
 #!/bin/bash
 
-# Unit tests for install.sh script
-# Run with: bash tests/install.sh
+# Test: Install Script Comprehensive Testing
+# Comprehensive test suite for the install.sh script covering all major functionality
+# including argument parsing, project creation, file copying, and error handling.
 
 set -euo pipefail
 
 # Test configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+TEST_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$TEST_DIR")"
 INSTALL_SCRIPT="$PROJECT_ROOT/scripts/install.sh"
 TEST_DIR="$PROJECT_ROOT/test-scenarios"
 
@@ -46,7 +48,7 @@ run_test() {
     local test_command="$2"
     local expected_exit_code="${3:-0}"
     
-    echo -e "${BLUE}[TEST]${NC} Running: $test_name"
+    echo -e "${BLUE}[TEST]${NC} $test_name"
     
     # Create a clean test directory
     local test_project_dir="$TEST_DIR/test-$test_name"
@@ -119,7 +121,7 @@ test_help() {
     local test_name="help_functionality"
     echo -e "${BLUE}[TEST]${NC} Running: $test_name"
     
-    if "$INSTALL_SCRIPT" --help 2>/dev/null | grep -q "Usage:"; then
+    if bash "$INSTALL_SCRIPT" --help 2>/dev/null | grep -q "Usage:"; then
         print_test_result "$test_name" "PASS" "Help output contains usage information"
     else
         print_test_result "$test_name" "FAIL" "Help output missing or incorrect"
@@ -132,14 +134,14 @@ test_error_handling() {
     echo -e "${BLUE}[TEST]${NC} Running: $test_name"
     
     # Test missing project root (with empty input to avoid interactive prompt)
-    if echo "" | "$INSTALL_SCRIPT" 2>/dev/null; then
+    if echo "" | bash "$INSTALL_SCRIPT" 2>/dev/null; then
         print_test_result "$test_name" "FAIL" "Script should fail with empty project name"
     else
         print_test_result "$test_name" "PASS" "Script fails with empty project name (as expected)"
     fi
     
     # Test invalid option
-    if ! "$INSTALL_SCRIPT" --invalid-option 2>/dev/null; then
+    if ! bash "$INSTALL_SCRIPT" --invalid-option 2>/dev/null; then
         print_test_result "$test_name" "PASS" "Script fails with invalid option (as expected)"
     else
         print_test_result "$test_name" "FAIL" "Script should fail with invalid option"
@@ -158,7 +160,7 @@ test_new_project() {
     
     # Run installation with output capture for debugging
     local install_output
-    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" 2>&1); then
+    if install_output=$(bash "$INSTALL_SCRIPT" "$project_dir" 2>&1); then
         # Test directory structure
         test_directory_structure "$test_name" "$project_dir"
         
@@ -193,7 +195,7 @@ test_existing_project() {
     
     # Run installation with output capture for debugging
     local install_output
-    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" 2>&1); then
+    if install_output=$(bash "$INSTALL_SCRIPT" "$project_dir" 2>&1); then
         # Test that existing context was preserved
         if [[ -f "$project_dir/.contextual/context/existing.md" ]]; then
             print_test_result "$test_name" "PASS" "Existing context file preserved"
@@ -226,7 +228,7 @@ test_custom_contextual_root() {
     
     # Run installation with custom contextual root
     local install_output
-    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" --contextual-root "$custom_root" 2>&1); then
+    if install_output=$(bash "$INSTALL_SCRIPT"  "$project_dir" --contextual-root "$custom_root" 2>&1); then
         # Test that custom root was used
         if [[ -d "$project_dir/$custom_root" ]]; then
             print_test_result "$test_name" "PASS" "Custom contextual root directory created"
@@ -258,7 +260,7 @@ test_different_agents() {
     
     # Test cursor agent (default)
     local install_output
-    if install_output=$("$INSTALL_SCRIPT"  "$project_dir" --agent cursor 2>&1); then
+    if install_output=$(bash "$INSTALL_SCRIPT"  "$project_dir" --agent cursor 2>&1); then
         if [[ -d "$project_dir/.cursor/commands" ]]; then
             print_test_result "$test_name" "PASS" "Cursor agent structure created"
         else
@@ -272,10 +274,33 @@ test_different_agents() {
     rm -rf "$project_dir" 2>/dev/null || true
 }
 
+# Function to test argument parsing
+test_argument_parsing() {
+    local test_name="argument_parsing"
+    echo -e "${BLUE}[TEST]${NC} Running: $test_name"
+    
+    # Test valid arguments
+    local project_dir="$TEST_DIR/test-args"
+    rm -rf "$project_dir" 2>/dev/null || true
+    
+    if bash "$INSTALL_SCRIPT"  "$project_dir" --agent cursor --contextual-root ".test-contextual" >/dev/null 2>&1; then
+        if [[ -d "$project_dir/.test-contextual" ]]; then
+            print_test_result "$test_name" "PASS" "All arguments parsed correctly"
+        else
+            print_test_result "$test_name" "FAIL" "Arguments not applied correctly"
+        fi
+    else
+        print_test_result "$test_name" "FAIL" "Valid arguments failed"
+    fi
+    
+    # Cleanup
+    rm -rf "$project_dir" 2>/dev/null || true
+}
+
 # Main test runner
 main() {
-    echo -e "${BLUE}Running install.sh unit tests...${NC}"
-    echo "=================================="
+    echo -e "${BLUE}Running install.sh comprehensive tests...${NC}"
+    echo "=============================================="
     
     # Ensure test directory exists
     mkdir -p "$TEST_DIR"
@@ -287,10 +312,11 @@ main() {
     test_existing_project
     test_custom_contextual_root
     test_different_agents
+    test_argument_parsing
     
     # Print summary
     echo ""
-    echo "=================================="
+    echo "=============================================="
     echo -e "${BLUE}Test Summary:${NC}"
     echo "Tests run: $TESTS_RUN"
     echo -e "Tests passed: ${GREEN}$TESTS_PASSED${NC}"

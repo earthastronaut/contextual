@@ -1,68 +1,43 @@
-# Analyze Project Structure
+# Goal
+Update the feature context with comprehensive project analysis. Perform multi-level analysis (shallow/standard/deep) of the project structure and create detailed documentation of the project structure, key files, technologies, architecture, dependencies, and relationships. Add analysis to `$FEATURE_DIR/analyzed/` directory and reference in the `$FEATURE_CONTEXT` file. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
 
-## Goal
-Update the feature context. Do a deep analysis of the current project structure and create a summary of the project structure, key files, and technologies used. Add this to the `$FEATURE_DIR/analyzed.md` file and reference directly in the `$FEATURE_CONTEXT` file. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
-
-## User Input
-
+# User Input
 ```text
 $ARGUMENTS
 ```
 
-You MUST consider the user input before proceeding (if not empty). This may include the folder to analyze.
+# Steps
 
-## Steps
-
-### 1. Prerequisites
-Execute: `.contextual/scripts/bash/analyze.sh`
+## 1. Prerequisites
+- Parse User Input for the directory to analyze and depth level. 
+- Use the parsed arguments to execute: `.contextual/scripts/bash/analyze.sh {ANALYSIS_INPUT_DIRECTORY:-PROJECT_ROOT} --analysis-depth {ANALYSIS_DEPTH:-standard}`
 This will output:
-- $SPECIFY_DIR: The specify directory path
-- $PROJECT_ROOT: The project root directory
-- $FEATURE_CONTEXT: The context file path
+- {ANALYSIS_OUTPUT_DIR}: The output directory path
+- {ANALYSIS_OUTPUT_ROOT}: The output root file path
+- {FEATURE_DIR}: The feature directory path
+- {FEATURE_CONTEXT}: The context file path
 
-### 2. Decide on folder to analyze
+## 2. Analysis
+- For each file in the {ANALYSIS_OUTPUT_DIR} directory, create a plan to read the file and tasks to update it based on its content. Ignore {ANALYSIS_OUTPUT_ROOT} file.
+   - General Guidelines:
+        - **Separation of concerns**: Keep context file focused on requirements, reference detailed analysis rather than duplicating it
+        - **Comprehensive coverage**: Include all aspects based on depth level
+        - **Logical organization**: Organize findings into clear sections for easy navigation
+        - **Readability**: Maintain clear, scannable format with structured information
+        - **Scope boundaries**: Follow all links and files to understand domain context, but only modify files within {ANALYSIS_OUTPUT_DIR} directory
+        - **Specification focus**: Create specifications only, do not implement the feature, only update the analysis files.
+        - **Performance**: Complete analysis in reasonable time (less than 5 minutes for deep mode on large projects)
+- Update the {ANALYSIS_OUTPUT_ROOT} file with links to the other templates in the {ANALYSIS_OUTPUT_DIR} directory.
+- Update the {ANALYSIS_OUTPUT_ROOT} file with all summary information.
 
-Populate a variable named ANALYSIS_INPUT_DIRECTORY with the folder to analyze. If the user input is not empty, use it as the folder to analyze. If the user input is empty, use the PROJECT_ROOT as the folder to analyze.
-
-### 3. Analyze Project Structure
-- Execute: `.contextual/scripts/bash/folder-analyzer.sh --input $ANALYSIS_INPUT_DIRECTORY --output $FEATURE_DIR/analyzed.md`
-This will output: files and directories
-
-### 2. Analyze Project Structure
-- Execute: `.contextual/scripts/bash/folder-analyzer.sh --input $PROJECT_ROOT --output $FEATURE_DIR/analyzed.md`
-This will output: files and directories
-
-### 3. File Analysis Loop
-For each line with `FILE DESCRIPTION` in `$FEATURE_DIR/analyzed.md`
-- Read the file link on that line
-- Create a 1 line summary of the file's purpose
-- Replace the `FILE DESCRIPTION` with the summary
-
-### 4. Folder Analysis Loop
-For each line with `FOLDER DESCRIPTION` in `$FEATURE_DIR/analyzed.md`
-- Read the all the descriptions of files and folders in that folder.
-- Create a 1 line summary of the folder's purpose
-- Replace the `FOLDER DESCRIPTION` with the summary
-
-### 5. Analysis
-- Analyze all the files and folders descriptions.
-- Replace `SUMMARY DESCRIPTION` with the analysis
+## 3. Update Context
+- Update the {FEATURE_CONTEXT} file with simple link to the{ANALYSIS_OUTPUT_ROOT} file with description to know what should look for. Do not duplicate infromation from the analysis files.
 
 ## Output
-- `$FEATURE_DIR/analyzed.md` file with comprehensive project analysis
-- Updated $FEATURE_CONTEXT with link to the analysis
+- Very concise summary and link to the {ANALYSIS_OUTPUT_ROOT} file.
 
 ## Next Steps
 After running this command:
-1. Review the generated `$FEATURE_DIR/analyzed.md` file for project understanding
+1. Review the generated analysis files for project understanding
 2. Use `/clarify` to resolve any ambiguities in the feature specification
 3. Use `/plan` to create detailed implementation plan
-4. Use `/implement` to begin feature implementation
-
-## Guidelines
-- **Separation of concerns**: Keep context file focused on requirements, reference detailed analysis rather than duplicating it
-- **Comprehensive coverage**: Include all aspects of project structure, technologies, and patterns
-- **Logical organization**: Organize findings into clear sections for easy navigation
-- **Readability**: Maintain clear, scannable format with structured information
-- **Scope boundaries**: Follow all links and files to understand domain context, but only modify files within $SPECIFY_DIR directory
-- **Specification focus**: Create specifications only, do not implement the feature

@@ -9,56 +9,18 @@ source "$SCRIPT_DIR/utils/config-utils.sh"
 source "$SCRIPT_DIR/utils/print-utils.sh"
 source "$SCRIPT_DIR/utils/env-utils.sh"
 source "$SCRIPT_DIR/utils/branch-utils.sh"
-
-# Function to check prerequisites
-check_prerequisites() {
-    # Check if we're in a valid environment
-    if ! validate_environment; then
-        return 1
-    fi
-    
-    # Check if we're on a feature branch
-    if ! is_feature_branch; then
-        return 1
-    fi
-    
-    # Check if context file exists
-    local context_file=$(get_context_file)
-    if [[ -z "$context_file" || ! -f "$context_file" ]]; then
-        return 1
-    fi
-    
-    return 0
-}
-
-# Function to get feature variables
-get_feature_variables() {
-    local context_file=$(get_context_file)
-    local feature_name=$(get_current_feature_display_name)
-    local feature_dir=$(get_feature_dir)
-    local feature_branch=$(git branch --show-current)
-    
-    # Output variables in format expected by plan.md
-    echo "SPECIFY_DIR: $SPECIFY_DIR"
-    echo "FEATURE: $feature_name"
-    echo "FEATURE_CONTEXT: $context_file"
-    
-    # Export variables for use by other scripts
-    export SPECIFY_DIR="$SPECIFY_DIR"
-    export FEATURE_NAME="$feature_name"
-    export FEATURE_CONTEXT="$context_file"
-}
+source "$SCRIPT_DIR/utils/feature-utils.sh"
 
 # Main plan function - returns variables only
 plan_feature() {
     # Check prerequisites
-    if ! check_prerequisites; then
+    if ! check_feature_prerequisites; then
         print_error "Prerequisites not met. Please ensure you're on a feature branch with a context file."
         return 1
     fi
     
     # Get and output feature variables
-    get_feature_variables
+    output_plan_variables
     
     return 0
 }

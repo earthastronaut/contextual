@@ -8,7 +8,8 @@ set -euo pipefail
 
 # Test configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+TEST_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$TEST_DIR")"
 CONTEXTUAL_ROOT="$PROJECT_ROOT/.contextual"
 SCRIPTS_DIR="$CONTEXTUAL_ROOT/scripts/bash"
 

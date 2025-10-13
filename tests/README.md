@@ -2,15 +2,39 @@
 
 This directory contains comprehensive tests for the contextual development tools project.
 
+## Quick Start
+
+Run all tests with a single command:
+
+```bash
+./contextual test           # Run all tests
+./contextual test --list    # List all test categories
+./contextual test --verbose # Run with detailed output
+```
+
 ## Test Structure
+
+All tests are organized into categories and run through a unified test runner that provides consolidated reporting.
 
 ### Test Files
 
-- **`run-tests.sh`** - Main test runner script
-- **`simple-test.sh`** - Basic install script functionality tests
-- **`install-test.sh`** - Comprehensive install script tests
-- **`contextual-scripts-test.sh`** - Tests for contextual workflow scripts
-- **`install.sh`** - Original unit tests (legacy)
+- **`run-tests.sh`** - Unified test runner (run all tests)
+
+- **`unit/`** - Unit tests directory
+  - **`test-print-utils.sh`** - Tests for print-utils.sh
+  - **`test-branch-utils.sh`** - Tests for branch-utils.sh
+  - **`test-analysis-utils.sh`** - Tests for analysis-utils.sh
+  - **`test-env-utils.sh`** - Tests for env-utils.sh
+  - **`test-config-utils.sh`** - Tests for config-utils.sh
+  
+- **`integration/`** - Integration tests directory
+  - **`test-simple.sh`** - Basic install script functionality tests
+  - **`test-install.sh`** - Comprehensive install script tests
+  - **`test-contextual-scripts.sh`** - Tests for contextual workflow scripts
+  - **`test-install-legacy.sh`** - Original unit tests (legacy)
+  
+- **`utils/`** - Test utilities directory
+  - **`test-framework.sh`** - Bash unit testing framework
 
 ### Test Categories
 
@@ -30,64 +54,154 @@ This directory contains comprehensive tests for the contextual development tools
    - Directory structure validation
    - Cursor command files validation
 
+3. **Unit Tests** (`unit/`)
+   - **Print Utils** - Tests for output formatting functions
+   - **Branch Utils** - Tests for branch naming and feature management
+   - **Analysis Utils** - Tests for project analysis utilities
+   - **Env Utils** - Tests for environment validation
+   - **Config Utils** - Tests for configuration management
+   - Each test suite validates individual function behavior
+   - Includes mock testing and edge case coverage
+
 ## Usage
 
-### Running All Tests
+### Running All Tests (Recommended)
+
+The unified test runner consolidates all test categories and provides comprehensive reporting:
 
 ```bash
-# Run all tests
-./run-tests.sh
+# Run all tests (unit + integration)
+./contextual test
 
-# Run all tests with verbose output
-./run-tests.sh --verbose
+# Alternative: run directly from tests directory
+./tests/run-tests.sh
 
-# Run all tests quietly (minimal output)
-./run-tests.sh --quiet
-```
+# Run with detailed output
+./contextual test --verbose
 
-### Running Specific Tests
-
-```bash
-# Run a specific test
-./run-tests.sh simple-test
-
-# Run another specific test
-./run-tests.sh install-test
+# Run quietly (errors only)
+./contextual test --quiet
 ```
 
 ### Listing Available Tests
 
 ```bash
-# List all available tests
-./run-tests.sh --list
+# List all test categories and individual tests
+./contextual test --list
+```
+
+### Running Specific Test Categories
+
+```bash
+# Run a specific unit test
+bash tests/unit/test-print-utils.sh
+bash tests/unit/test-branch-utils.sh
+
+# Run a specific integration test
+bash tests/integration/test-simple.sh
+bash tests/integration/test-install.sh
+```
+
+### Cleanup
+
+```bash
+# Clean up test artifacts
+./contextual test --cleanup
 ```
 
 ### Getting Help
 
 ```bash
 # Show help information
-./run-tests.sh --help
+./contextual test --help
 ```
 
-### Cleanup
+## Test Framework
+
+The test suite includes a custom bash unit testing framework (`utils/test-framework.sh`) that provides:
+
+### Testing Utilities
+
+- **`init_test_suite(name)`** - Initialize a test suite with a name
+- **`assert_equals(expected, actual, message)`** - Assert two values are equal
+- **`assert_not_empty(value, message)`** - Assert a value is not empty
+- **`assert_empty(value, message)`** - Assert a value is empty
+- **`assert_success(message, command...)`** - Assert a command succeeds
+- **`assert_failure(message, command...)`** - Assert a command fails
+- **`assert_file_exists(path, message)`** - Assert a file exists
+- **`assert_dir_exists(path, message)`** - Assert a directory exists
+- **`assert_contains(haystack, needle, message)`** - Assert string contains substring
+- **`print_test_summary()`** - Print test results summary
+- **`create_test_dir()`** - Create temporary test directory
+- **`cleanup_test_dir(path)`** - Clean up test directory
+
+### Test Structure
+
+Each unit test file follows this structure:
 
 ```bash
-# Clean up test artifacts manually
-./run-tests.sh --cleanup
+#!/bin/bash
+set -euo pipefail
+
+# Source test framework
+source "path/to/test-framework.sh"
+
+# Source module under test
+source "path/to/module.sh"
+
+# Test functions
+test_feature_name() {
+    local result=$(function_to_test "input")
+    assert_equals "expected" "$result" "Test description"
+}
+
+# Main test runner
+main() {
+    init_test_suite "Test Suite Name"
+    test_feature_name
+    print_test_summary
+    exit $?
+}
+
+main "$@"
 ```
 
 ## Test Features
 
+### Unified Test Runner
+
+The consolidated test framework (`./contextual test`) provides:
+
+- **Category-based Organization**: Tests organized into logical categories (Unit Tests, Integration Tests)
+- **Consolidated Reporting**: Single summary showing all test categories and overall results
+- **Flexible Output**: Verbose, normal, and quiet modes for different use cases
+- **Fast Execution**: Parallel test execution where possible
+- **Automatic Cleanup**: Cleans up test artifacts after execution
+
 ### Comprehensive Coverage
-- **Install Script**: Tests all major functionality including argument parsing, project creation, file copying, and error handling
-- **Contextual Scripts**: Validates all workflow scripts and utility functions
-- **Directory Structure**: Ensures proper project structure is maintained
-- **Error Handling**: Tests various error conditions and edge cases
+
+- **Unit Tests** (tests/unit/): Fast, isolated tests for bash utility functions
+  - Print utilities (output formatting)
+  - Branch utilities (feature management)
+  - Analysis utilities (project analysis)
+  - Environment utilities (validation)
+  - Configuration utilities (config management)
+  - 97 individual test cases with mock support
+
+- **Integration Tests** (tests/integration/): End-to-end tests for complete workflows
+  - Install script functionality (test-install.sh)
+  - Simple workflow tests (test-simple.sh)
+  - Contextual scripts validation (test-contextual-scripts.sh)
+  - Project setup and updates
+  - Directory structure verification
+  - 69+ individual test cases
 
 ### Test Output
+
 - **Colored Output**: Easy-to-read test results with color coding
-- **Progress Tracking**: Real-time test execution progress
-- **Detailed Results**: Comprehensive test summaries with pass/fail counts
+- **Category Tracking**: Shows pass/fail status per test category
+- **Progress Tracking**: Real-time test execution with duration reporting
+- **Final Summary**: Consolidated summary with success rate and total duration
 - **Error Reporting**: Clear error messages for failed tests
 
 ### Test Isolation

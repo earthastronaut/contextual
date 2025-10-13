@@ -7,7 +7,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+TESTS_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$(dirname "$TESTS_DIR")"
 INSTALL_SCRIPT="$PROJECT_ROOT/scripts/install.sh"
 TEST_DIR="$PROJECT_ROOT/test-scenarios"
 

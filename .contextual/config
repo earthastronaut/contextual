@@ -12,3 +12,12 @@
 
 # Merge commit message template (use {FEATURE_BRANCH} and {DESCRIPTION} placeholders)
 # MERGE_TEMPLATE="Merge {FEATURE_BRANCH}: {DESCRIPTION}"
+
+# Folder Analyzer - Skip Patterns
+# Comma-separated list of patterns to skip (case-insensitive substring match)
+# Uncomment to override defaults (cache,__pycache__,node_modules,vendor,dist,build,.pytest_cache,.tox,venv,.venv,.env,.next,.nuxt,.bundle,*.egg-info,target,.gradle)
+# ANALYZE_SKIP_PATTERNS=""
+
+# Folder Analyzer - Include Patterns
+# Comma-separated list of patterns to always include (overrides skip patterns)
+# ANALYZE_INCLUDE_PATTERNS=""

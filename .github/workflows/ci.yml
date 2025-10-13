@@ -1,0 +1,56 @@
+name: CI/CD Pipeline
+
+on:
+  # Run on pull requests to main
+  pull_request:
+    branches:
+      - main
+  
+  # Run on pushes to main (after merge)
+  push:
+    branches:
+      - main
+  
+  # Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Test Suite
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup environment
+        run: |
+          echo "Setting up test environment..."
+          chmod +x tests/run-tests.sh
+          chmod +x contextual
+          # Make all test files executable
+          find tests -name "*.sh" -type f -exec chmod +x {} \;
+      
+      - name: Run unit tests
+        run: |
+          echo "Running unit tests..."
+          bash tests/run-tests.sh --verbose
+        env:
+          CI: true
+      
+      - name: Cleanup test artifacts
+        if: always()
+        run: |
+          echo "Cleaning up test artifacts..."
+          bash tests/run-tests.sh --cleanup || true
+      
+      - name: Test summary
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ All tests passed successfully!"
+          else
+            echo "❌ Some tests failed. Please review the logs above."
+            exit 1
+          fi
+

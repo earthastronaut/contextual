@@ -8,6 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils/config-utils.sh"
 source "$SCRIPT_DIR/utils/print-utils.sh"
 source "$SCRIPT_DIR/utils/branch-utils.sh"
+source "$SCRIPT_DIR/utils/feature-utils.sh"
 
 # No colors - using default terminal colors
 
@@ -18,43 +19,12 @@ check_implementation_readiness() {
         return 1
     fi
     
-    # Check if context file has content
-    local context_file=$(get_context_file)
-    local line_count=$(wc -l < "$context_file")
-    
-    if [[ $line_count -lt 10 ]]; then
-        print_warning "Context file seems minimal. Consider adding more details."
-    fi
-    
-    # Check for uncommitted changes in context file
-    if git ls-files --error-unmatch "$context_file" >/dev/null 2>&1; then
-        # File is tracked by git
-        if ! git diff --quiet "$context_file"; then
-            print_error "Context file has uncommitted changes. Please commit changes before implementation." >&2
-            echo "File: $context_file" >&2
-            echo "Use: git add '$context_file' && git commit -m 'Update context file'" >&2
-            return 1
-        fi
-    fi
-    
-    return 0
-}
-
-# Function to output key variables
-output_variables() {
-    local context_file=$(get_context_file)
-    if [[ -z "$context_file" ]]; then
-        print_error "Could not find context file" >&2
+    # Check context file readiness
+    if ! check_context_file_readiness; then
         return 1
     fi
     
-    local feature_name=$(get_current_feature_display_name)
-    local branch=$(git branch --show-current)
-    # tasks.md
-
-    # Only output the variables, no other messages
-    echo "FEATURE=\"$feature_name\""
-    echo "FEATURE_CONTEXT=\"$context_file\""
+    return 0
 }
 
 # Main implement function
@@ -66,7 +36,7 @@ implement_feature() {
     fi
     
     # Output key variables
-    output_variables
+    output_implement_variables
     
     return 0
 }
