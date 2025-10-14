@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Implement command implementation
 # Returns key variables for FEATURE and FEATURE_CONTEXT
 

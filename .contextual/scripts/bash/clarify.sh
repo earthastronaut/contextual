@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Clarify command implementation
 # Returns feature variables for use in clarify.md command
 

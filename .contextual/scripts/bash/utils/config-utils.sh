@@ -40,8 +40,8 @@ MERGE_TEMPLATE="${CONTEXTUAL_MERGE_TEMPLATE:-${MERGE_TEMPLATE:-Merge \{FEATURE_B
 # Folder Analyzer Patterns (defaults set in folder-analyzer.sh)
 ANALYZE_SKIP_PATTERNS="${CONTEXTUAL_ANALYZE_SKIP_PATTERNS:-${ANALYZE_SKIP_PATTERNS:-}}"
 ANALYZE_INCLUDE_PATTERNS="${CONTEXTUAL_ANALYZE_INCLUDE_PATTERNS:-${ANALYZE_INCLUDE_PATTERNS:-}}"
-# Calculated
-CONTEXT_DIR=$(dirname "$CONTEXTUAL_ROOT")
+# Calculated - should point to .contextual/context directory
+CONTEXT_DIR="$CONTEXTUAL_ROOT/context"
 # =========================
 
 # Function to get all context files

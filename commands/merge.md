@@ -16,12 +16,12 @@ You MUST consider the user input before proceeding (if not empty).
 ### 1. Prerequisites
 Execute: `.contextual/scripts/bash/merge-prerequisites.sh`
 This will output:
-- {FEATURE_SPEC}: The path to the feature specification file
+- {CURRENT_BRANCH}: The current branch name
 - {MERGE_TEMPLATE}: The template for the commit message
 
 ### 2. Analyze Feature
-- Use {FEATURE_SPEC} and User Input to generate a summary commit message called {DESCRIPTION}
-- Use {MERGE_TEMPLATE} and {DESCRIPTION} to generate a commit message called {COMMIT_MESSAGE}
+- Use current changes, the git log, and User Input to generate a summary commit message called {DESCRIPTION}
+- Use {MERGE_TEMPLATE} and {DESCRIPTION} to generate a concise commit message called {COMMIT_MESSAGE}
 
 ### 3. Execute Merge
 - Execute: `.contextual/scripts/bash/merge.sh --message "{COMMIT_MESSAGE}"`

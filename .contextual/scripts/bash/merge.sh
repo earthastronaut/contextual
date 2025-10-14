@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Merge script implementation
 # Executes git merge operations with provided commit message
 
@@ -14,18 +16,19 @@ show_merge_help() {
     echo ""
     echo "Usage: merge.sh --message \"COMMIT_MESSAGE\""
     echo ""
-    echo "Purpose: Executes git merge operations"
+    echo "Purpose: Executes git merge operations from current branch to main"
     echo ""
     echo "Parameters:"
     echo "  --message    Commit message for the merge (required)"
     echo ""
     echo "What it does:"
-    echo "  1. Checks out main branch"
-    echo "  2. Performs squash merge with feature branch"
-    echo "  3. Commits with provided message"
+    echo "  1. Captures current branch name"
+    echo "  2. Checks out main branch"
+    echo "  3. Performs squash merge with current branch"
+    echo "  4. Commits with provided message"
     echo ""
     echo "Example:"
-    echo "  merge.sh --message \"Merge feature/0003-merge-command: merge-command\""
+    echo "  merge.sh --message \"Merge 0003-merge-command: merge-command\""
 }
 
 # Function to parse command line arguments
@@ -68,13 +71,13 @@ validate_environment() {
 
 # Function to execute merge
 execute_merge() {
-    # Get current feature branch
-    local feature_branch=$(git branch --show-current)
+    # Get current branch
+    local current_branch=$(git branch --show-current)
     
     # Use provided commit message or create default
     local commit_message="$COMMIT_MESSAGE"
     if [[ -z "$commit_message" ]]; then
-        commit_message="Merge $feature_branch: feature implementation"
+        commit_message="Merge $current_branch: feature implementation"
     fi
 
     # Checkout main branch
@@ -84,12 +87,12 @@ execute_merge() {
     fi
     
     # Perform squash merge
-    if ! git merge --squash "$feature_branch"; then
+    if ! git merge --squash "$current_branch"; then
         print_error "Merge conflicts detected. Aborting merge."
         print_error "Please resolve conflicts manually and try again."
         return 1
     fi
-    
+
     # Commit with provided message
     if ! git commit -m "$commit_message"; then
         print_error "Failed to commit changes"

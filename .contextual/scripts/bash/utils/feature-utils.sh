@@ -87,18 +87,6 @@ output_implement_variables() {
     echo "FEATURE_CONTEXT=\"$FEATURE_CONTEXT\""
 }
 
-# Function to output specific variables for merge command
-output_merge_variables() {
-    get_all_feature_variables
-    
-    echo "MERGE_TEMPLATE: $MERGE_TEMPLATE"
-    echo "FEATURE_SPEC: $FEATURE_CONTEXT"
-    
-    # Export for use by other scripts
-    export FEATURE_SPEC="$FEATURE_CONTEXT"
-    export MERGE_TEMPLATE="$MERGE_TEMPLATE"
-}
-
 # Function to check if context file is ready for implementation
 check_context_file_readiness() {
     local context_file=$(get_feature_context_file)
@@ -119,31 +107,6 @@ check_context_file_readiness() {
             echo "Use: git add '$context_file' && git commit -m 'Update context file'" >&2
             return 1
         fi
-    fi
-    
-    return 0
-}
-
-# Function to check merge prerequisites (additional checks for merge operations)
-check_merge_prerequisites() {
-    # First check basic prerequisites
-    if ! check_feature_prerequisites; then
-        return 1
-    fi
-    
-    # Check if branch is clean (no uncommitted changes)
-    if ! git diff-index --quiet HEAD --; then
-        print_error "Branch has uncommitted changes. Please commit or stash changes before merging."
-        print_error "Use 'git status' to see uncommitted changes."
-        return 1
-    fi
-    
-    # Check if there are untracked files that might be important
-    local untracked_files=$(git ls-files --others --exclude-standard)
-    if [[ -n "$untracked_files" ]]; then
-        print_warning "There are untracked files in the repository:"
-        echo "$untracked_files" | sed 's/^/  /'
-        print_warning "Consider adding and committing important files before merging."
     fi
     
     return 0

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Specify command implementation
 # Creates a new feature specification with proper branch and file structure
 

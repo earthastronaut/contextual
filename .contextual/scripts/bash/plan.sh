@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Plan command implementation
 # Returns feature variables for use in plan.md command
 

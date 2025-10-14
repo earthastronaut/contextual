@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Project Structure Analysis Script
 # Analyzes a directory and generates structured documentation
 

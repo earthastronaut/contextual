@@ -49,6 +49,12 @@ is_feature_branch() {
     [[ $current_branch == feature/* ]]
 }
 
+# Function to check if we're NOT on the main branch
+is_not_main_branch() {
+    local current_branch=$(git branch --show-current 2>/dev/null)
+    [[ -n "$current_branch" && "$current_branch" != "$MAIN_BRANCH" ]]
+}
+
 # Function to get feature directory path
 get_feature_dir() {
     local feature_name=$(get_current_feature_name)
@@ -109,6 +115,7 @@ export -f sanitize_feature_name
 export -f get_current_feature_name
 export -f get_current_feature_display_name
 export -f is_feature_branch
+export -f is_not_main_branch
 export -f get_feature_dir
 export -f get_feature_context_file
 export -f validate_feature_setup

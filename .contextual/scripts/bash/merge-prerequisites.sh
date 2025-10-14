@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Merge prerequisites command implementation
 # Returns merge variables for use in merge operations
 
@@ -11,17 +13,53 @@ source "$SCRIPT_DIR/utils/env-utils.sh"
 source "$SCRIPT_DIR/utils/branch-utils.sh"
 source "$SCRIPT_DIR/utils/feature-utils.sh"
 
-# Main merge prerequisites function - returns variables only
-get_merge_prerequisites() {
-    # Check prerequisites
-    if ! check_merge_prerequisites; then
-        print_error "Prerequisites not met. Please ensure you're on a feature branch with a context file and no uncommitted changes."
+# Function to check merge prerequisites (additional checks for merge operations)
+check_merge_prerequisites() {
+    local current_branch=$1
+
+    # Check if we're in a valid environment
+    if ! validate_environment; then
         return 1
     fi
     
-    # Get and output merge variables
-    output_merge_variables
+    # Check if we're NOT on the main branch
+    if [[ "$current_branch" == "$MAIN_BRANCH" ]]; then
+        print_error "Cannot merge from main branch. Current branch: ${current_branch:-unknown}"
+        print_error "Please switch to a feature or topic branch first."
+        return 1
+    fi
     
+    # Check if branch is clean (no uncommitted changes)
+    if ! git diff-index --quiet HEAD --; then
+        print_error "Branch has uncommitted changes. Please commit or stash changes before merging."
+        print_error "Use 'git status' to see uncommitted changes."
+        return 1
+    fi
+    
+    # Check if there are untracked files that might be important
+    local untracked_files=$(git ls-files --others --exclude-standard)
+    if [[ -n "$untracked_files" ]]; then
+        print_warning "There are untracked files in the repository:"
+        echo "$untracked_files" | sed 's/^/  /'
+        print_warning "Consider adding and committing important files before merging."
+    fi
+    
+    return 0
+}
+
+# Main merge prerequisites function - returns variables only
+get_merge_prerequisites() {
+    local current_branch=$(git branch --show-current)
+    # Check prerequisites
+    if ! check_merge_prerequisites "$current_branch"; then
+        print_error "Prerequisites not met. Please ensure you have no uncommitted changes."
+        return 1
+    fi
+
+    # Get and output merge variables
+    echo "MERGE_TEMPLATE: $MERGE_TEMPLATE"
+    echo "CURRENT_BRANCH: $current_branch"
+
     return 0
 }
 
@@ -34,8 +72,6 @@ show_merge_prerequisites_help() {
     echo "Purpose: Returns merge variables for use in merge operations"
     echo ""
     echo "Prerequisites:"
-    echo "  - Must be on a feature branch"
-    echo "  - Feature context file must exist"
     echo "  - Branch must be clean (no uncommitted changes)"
     echo ""
     echo "What it does:"
