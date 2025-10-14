@@ -34,6 +34,7 @@ CONTEXTUAL_ROOT=".contextual"
 # Variable with override support
 # Priority: 1) Environment variables (CONTEXTUAL_*), 2) Config file, 3) Defaults
 CONTEXTUAL_ROOT="${CONTEXTUAL_CONTEXTUAL_ROOT:-${CONTEXTUAL_ROOT:-.contextual}}"
+CONTEXT_ROOT="${CONTEXTUAL_CONTEXT_ROOT:-${CONTEXT_ROOT:-.contextual/context/README.md}}"
 SPECS_DIR="${CONTEXTUAL_SPECS_DIR:-${SPECS_DIR:-specs}}"
 MAIN_BRANCH="${CONTEXTUAL_MAIN_BRANCH:-${MAIN_BRANCH:-main}}"
 MERGE_TEMPLATE="${CONTEXTUAL_MERGE_TEMPLATE:-${MERGE_TEMPLATE:-Merge \{FEATURE_BRANCH\}: \{DESCRIPTION\}}}"
@@ -76,6 +77,7 @@ refresh_context
 # Export variables and functions for use in other scripts
 export GIT_REPO_ROOT
 export CONTEXTUAL_ROOT
+export CONTEXT_ROOT
 export CONTEXT_DIR
 export SPECS_DIR
 export MAIN_BRANCH
