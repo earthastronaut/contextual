@@ -78,7 +78,7 @@ get_feature_context_file() {
 # Function to validate feature setup
 validate_feature_setup() {
     local feature_dir=$(get_feature_dir)
-    local context_file=$(get_context_file)
+    local context_file=$(get_feature_context_file)
     local current_branch=$(git branch --show-current 2>/dev/null)
     
     if [[ -z "$feature_dir" ]]; then

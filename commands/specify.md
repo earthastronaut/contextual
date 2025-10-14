@@ -4,7 +4,7 @@ Create a new feature context.md file in the spec-driven development flow based o
 # User Input
 
 ```text
-$ARGUMENTS
+${ARGUMENTS}
 ```
 
 You MUST consider the user input before proceeding (if not empty). Do not implement the feature - just create the specification. Ignore action words like update, implement, modify, etc. - focus on WHAT needs to be specified.
@@ -31,22 +31,29 @@ IF user input lacks technical detail or context:
 - Review linked files relevant to the feature
 - Use this information to enrich the specification
 
-### 4. Write Specification
+## 4. Write Specification
 Update ${FEATURE_CONTEXT} following it's structure.
 
 Add [NEEDS CLARIFICATION: question?] markers for any ambiguous areas. Don't make up answers - ask questions.
 
-## Quality Guidelines
-- Keep each section distinct with no duplicate information across sections, cross-reference where needed.
+# Output
+- Created feature branch: ${FEATURE_BRANCH}
+- Created feature directory: ${FEATURE_DIR}
+- Created context file: ${FEATURE_CONTEXT}
+- Updated context with specification details
+
+# Next Steps
+After running this command:
+1. (optional) Use `/analyze` to do deeper analysis
+2. (optional) Use `/clarify` to resolve markers
+3. (optional) Use `/plan` for implementation details
+4. Use `/implement` to implement tasks from the spec
+5. Use `/commit` to commit the changes
+6. Use `/merge` to merge the changes into the main branch
+
+# Guidelines
+- Keep each section distinct with no duplicate information across sections, cross-reference where needed
 - Be specific and measurable in requirements and acceptance criteria
 - Make tasks actionable implementation steps, not requirement restatements
 - Focus on key information - be concise and to the point
-
-## Next Steps
-- (optional) `/analyze` to do deeper analysis
-- (optional) `/clarify` to resolve markers
-- (optional) `/plan` for implementation details
-- `/implement` to implement tasks from the spec
-- `/commit` to commit the changes
-- `/merge` to merge the changes into the main branch
 
