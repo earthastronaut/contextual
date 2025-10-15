@@ -1,6 +1,6 @@
 ---
 config:
-  SPECIFY_DIR: ./specs
+  SPECIFY_DIR: specs
 ---
 # Goal
 

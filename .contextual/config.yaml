@@ -10,8 +10,11 @@
 # MAIN_BRANCH: main
 
 # Merge commit message template
-# Available placeholders: {FEATURE_BRANCH}, {DESCRIPTION}
-# MERGE_TEMPLATE: "Merge {FEATURE_BRANCH}: {DESCRIPTION}"
+# MERGE_TEMPLATE: |
+#   Merge {FEATURE_BRANCH}: {DESCRIPTION}
+#   - {commit_hash}: one line per commit included.
+#   ...
+#   spec: {FEATURE_CONTEXT}
 
 # Folder Analyzer - Exclude Patterns
 # List of patterns to exclude during analysis (case-insensitive substring match)
@@ -39,5 +42,4 @@
 # ANALYZE_INCLUDE_PATTERNS: []
 
 # Global context root file (optional)
-# CONTEXT_ROOT: .contextual/context/README.md
-
+# CONTEXT_ROOT: README.md

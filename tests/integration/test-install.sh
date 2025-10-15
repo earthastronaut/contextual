@@ -301,6 +301,86 @@ test_argument_parsing() {
     rm -rf "$project_dir" 2>/dev/null || true
 }
 
+# Function to test command inclusion
+test_command_inclusion() {
+    local test_name="command_inclusion"
+    local project_dir="$TEST_DIR/test-include"
+    
+    echo -e "${BLUE}[TEST]${NC} Running: $test_name"
+    
+    # Clean up any existing test directory
+    rm -rf "$project_dir" 2>/dev/null || true
+    
+    # Run installation including only specific commands
+    local install_output
+    if install_output=$(bash "$INSTALL_SCRIPT" "$project_dir" --include "specify.md,implement.md,commit.md" 2>&1); then
+        # Test that included commands ARE installed
+        if [[ -f "$project_dir/.contextual/commands/specify.md" ]]; then
+            print_test_result "$test_name" "PASS" "specify.md included in .contextual/commands"
+        else
+            print_test_result "$test_name" "FAIL" "specify.md should be included but was not installed"
+        fi
+        
+        if [[ -f "$project_dir/.contextual/commands/implement.md" ]]; then
+            print_test_result "$test_name" "PASS" "implement.md included in .contextual/commands"
+        else
+            print_test_result "$test_name" "FAIL" "implement.md should be included but was not installed"
+        fi
+        
+        if [[ -f "$project_dir/.contextual/commands/commit.md" ]]; then
+            print_test_result "$test_name" "PASS" "commit.md included in .contextual/commands"
+        else
+            print_test_result "$test_name" "FAIL" "commit.md should be included but was not installed"
+        fi
+        
+        # Test that included commands have symlinks
+        if [[ -L "$project_dir/.cursor/commands/specify.md" ]]; then
+            print_test_result "$test_name" "PASS" "specify.md symlink created"
+        else
+            print_test_result "$test_name" "FAIL" "specify.md symlink should exist"
+        fi
+        
+        if [[ -L "$project_dir/.cursor/commands/implement.md" ]]; then
+            print_test_result "$test_name" "PASS" "implement.md symlink created"
+        else
+            print_test_result "$test_name" "FAIL" "implement.md symlink should exist"
+        fi
+        
+        if [[ -L "$project_dir/.cursor/commands/commit.md" ]]; then
+            print_test_result "$test_name" "PASS" "commit.md symlink created"
+        else
+            print_test_result "$test_name" "FAIL" "commit.md symlink should exist"
+        fi
+        
+        # Test that non-included commands are NOT installed
+        if [[ ! -f "$project_dir/.contextual/commands/analyze.md" ]]; then
+            print_test_result "$test_name" "PASS" "analyze.md (non-included) not installed"
+        else
+            print_test_result "$test_name" "FAIL" "analyze.md should not be installed"
+        fi
+        
+        if [[ ! -f "$project_dir/.contextual/commands/plan.md" ]]; then
+            print_test_result "$test_name" "PASS" "plan.md (non-included) not installed"
+        else
+            print_test_result "$test_name" "FAIL" "plan.md should not be installed"
+        fi
+        
+        # Test that non-included commands do not have symlinks
+        if [[ ! -L "$project_dir/.cursor/commands/analyze.md" ]]; then
+            print_test_result "$test_name" "PASS" "analyze.md symlink not created"
+        else
+            print_test_result "$test_name" "FAIL" "analyze.md symlink should not exist"
+        fi
+        
+        print_test_result "$test_name" "PASS" "Command inclusion installation completed successfully"
+    else
+        print_test_result "$test_name" "FAIL" "Command inclusion installation failed: $install_output"
+    fi
+    
+    # Cleanup
+    rm -rf "$project_dir" 2>/dev/null || true
+}
+
 # Main test runner
 main() {
     echo -e "${BLUE}Running install.sh comprehensive tests...${NC}"
@@ -317,6 +397,7 @@ main() {
     test_custom_contextual_root
     test_different_agents
     test_argument_parsing
+    test_command_inclusion
     
     # Print summary
     echo ""

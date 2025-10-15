@@ -1,6 +1,7 @@
 ---
 config:
-  SPECIFY_DIR: ./specs
+  SPECIFY_DIR: specs
+  CONTEXT_ROOT: README.md
 ---
 # Goal
 
@@ -74,7 +75,12 @@ What problem does this solve and what is the proposed solution? (2-3 sentences)
 - [ ] task 2
 ```
 
-## 4. Populate with User Request
+## 4. Read Global Context
+
+1. If `${CONTEXT_ROOT}` exists, read it for project overview and context
+2. Use this information to understand project purpose, structure, and conventions
+
+## 5. Populate with User Request
 
 1. Analyze user request (${ARGUMENTS}) to understand **WHAT** needs to be done
 2. Scan project for relevant context and patterns as needed
@@ -83,7 +89,7 @@ What problem does this solve and what is the proposed solution? (2-3 sentences)
 5. Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas
 6. Use `- [ ]` for incomplete tasks
 
-## 5. Validate Changes
+## 6. Validate Changes
 
 Before completing:
 1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
@@ -117,6 +123,10 @@ After running this command:
 6. Use `/commit` then `/merge` when complete
 
 # Guidelines
+
+**Global Context:**
+- Read `${CONTEXT_ROOT}` if it exists to understand project context and patterns.
+- Use global context to align feature specifications with project conventions
 
 **Specification Best Practices:**
 - Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas

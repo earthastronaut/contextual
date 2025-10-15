@@ -1,6 +1,7 @@
 ---
 config:
-  SPECIFY_DIR: ./specs
+  SPECIFY_DIR: specs
+  CONTEXT_ROOT: README.md
 ---
 # Goal
 
@@ -45,7 +46,8 @@ ${ARGUMENTS}
 
 ## 2. Read Current State
 
-Read `${FEATURE_CONTEXT}` and related files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+1. Read `${FEATURE_CONTEXT}` and related files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+2. If `${CONTEXT_ROOT}` exists, read only relevant parts to understand project context for this clarification.
 
 ## 3. Update Specification
 
@@ -102,6 +104,10 @@ After running this command:
 4. Use `/implement` to execute tasks
 
 # Guidelines
+
+**Global Context:**
+- Read `${CONTEXT_ROOT}` if it exists and relevant to understand project conventions
+- Use global context to inform clarifications and resolve ambiguities where relevant.
 
 **Specification Updates:**
 - Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas

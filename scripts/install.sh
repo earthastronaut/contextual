@@ -165,6 +165,7 @@ NC='\033[0m' # No Color
 PROJECT_ROOT=""
 AGENT="$DEFAULT_AGENT"
 CONTEXTUAL_TARGET="$DEFAULT_CONTEXTUAL_ROOT"
+INCLUDE_COMMANDS=""
 
 # Function to print colored output
 print_info() {
@@ -210,6 +211,8 @@ OPTIONS:
                             - roo         (Roo Code IDE)
                             - q           (Amazon Q Developer CLI)
     --contextual-root PATH Contextual root directory (default: .contextual)
+    --include COMMANDS     Comma-separated list of commands to include
+                          Example: --include specify.md,implement.md,commit.md
     --help                 Show this help message
 
 EXAMPLES:
@@ -217,6 +220,7 @@ EXAMPLES:
     $0 /path/to/project --agent cursor
     $0 /path/to/project --agent claude
     $0 /path/to/project --contextual-root .dev-tools
+    $0 /path/to/project --include specify.md,implement.md,commit.md
 
 EOF
 }
@@ -283,6 +287,28 @@ create_project_directory() {
     fi
 }
 
+# Function to check if a command should be included
+is_command_included() {
+    local cmd_name="$1"
+    local include_list="$2"
+    
+    if [[ -z "$include_list" ]]; then
+        return 0  # Include all if no filter specified
+    fi
+    
+    # Split include list by comma
+    IFS=',' read -ra INCLUDED <<< "$include_list"
+    for included_cmd in "${INCLUDED[@]}"; do
+        # Trim whitespace
+        included_cmd=$(echo "$included_cmd" | xargs)
+        if [[ "$cmd_name" == "$included_cmd" ]]; then
+            return 0  # Is included
+        fi
+    done
+    
+    return 1  # Not included
+}
+
 # Function to setup agent-specific folder structure
 setup_agent_structure() {
     local project_dir="$1"
@@ -322,27 +348,39 @@ copy_contextual_files() {
     # Copy context directory (preserve existing)
     if [[ -d "$CONTEXTUAL_ROOT/context" ]]; then
         print_info "Copying context files (preserving existing)..."
-        if [[ -d "$target_dir/context" ]]; then
-            # Merge context directories, preserving existing files
-            cp -r "$CONTEXTUAL_ROOT/context"/* "$target_dir/context/" 2>/dev/null || true
-        else
-            cp -r "$CONTEXTUAL_ROOT/context" "$target_dir/"
-        fi
+        mkdir -p "$target_dir/context"
+        # Copy each file individually, preserving existing files
+        for file in "$CONTEXTUAL_ROOT/context"/*; do
+            if [[ -f "$file" ]]; then
+                local filename="$(basename "$file")"
+                if [[ ! -f "$target_dir/context/$filename" ]]; then
+                    cp "$file" "$target_dir/context/$filename"
+                fi
+            fi
+        done
         print_success "Context files copied"
     fi
     
-    # Copy README.md if it exists
+    # Copy README.md if it exists and doesn't already exist in target
     if [[ -f "$CONTEXTUAL_ROOT/README.md" ]]; then
-        print_info "Copying README.md..."
-        cp "$CONTEXTUAL_ROOT/README.md" "$target_dir/"
-        print_success "README.md copied"
+        if [[ ! -f "$target_dir/README.md" ]]; then
+            print_info "Copying README.md..."
+            cp "$CONTEXTUAL_ROOT/README.md" "$target_dir/"
+            print_success "README.md copied"
+        else
+            print_info "README.md already exists (preserving)"
+        fi
     fi
     
-    # Copy config.yaml
+    # Copy config.yaml if it exists and doesn't already exist in target
     if [[ -f "$CONTEXTUAL_ROOT/config.yaml" ]]; then
-        print_info "Copying config.yaml..."
-        cp "$CONTEXTUAL_ROOT/config.yaml" "$target_dir/"
-        print_success "config.yaml copied"
+        if [[ ! -f "$target_dir/config.yaml" ]]; then
+            print_info "Copying config.yaml..."
+            cp "$CONTEXTUAL_ROOT/config.yaml" "$target_dir/"
+            print_success "config.yaml copied"
+        else
+            print_info "config.yaml already exists (preserving)"
+        fi
     else
         print_warning "config.yaml not found in $CONTEXTUAL_ROOT"
     fi
@@ -353,6 +391,7 @@ install_agent_commands() {
     local project_dir="$1"
     local agent="$2"
     local contextual_target="$3"
+    local include_commands="$4"
     
     local contextual_commands_dir="$project_dir/$contextual_target/commands"
     local config_file="$project_dir/$contextual_target/config.yaml"
@@ -360,11 +399,29 @@ install_agent_commands() {
     # Create .contextual/commands directory
     mkdir -p "$contextual_commands_dir"
     
-    # Copy command files to .contextual/commands
+    # Copy command files to .contextual/commands (only including specified commands if filter is set)
     print_info "Installing command files to $contextual_commands_dir..."
     if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
-        cp "$COMMANDS_SOURCE"/*.md "$contextual_commands_dir/"
-        print_success "Command files installed"
+        local installed_count=0
+        local skipped_count=0
+        for cmd_file in "$COMMANDS_SOURCE"/*.md; do
+            if [[ -f "$cmd_file" ]]; then
+                local cmd_name="$(basename "$cmd_file")"
+                if is_command_included "$cmd_name" "$include_commands"; then
+                    cp "$cmd_file" "$contextual_commands_dir/"
+                    installed_count=$((installed_count + 1))
+                else
+                    print_info "Skipping command: $cmd_name"
+                    skipped_count=$((skipped_count + 1))
+                fi
+            fi
+        done
+        if [[ $installed_count -gt 0 ]]; then
+            print_success "Command files installed ($installed_count installed, $skipped_count skipped)"
+        else
+            print_warning "No command files installed (all skipped)"
+            return 1
+        fi
     else
         print_warning "No command files found in $COMMANDS_SOURCE"
         return 1
@@ -480,11 +537,15 @@ install_contextual() {
     local project_dir="$1"
     local agent="$2"
     local contextual_target="$3"
+    local include_commands="$4"
     
     print_info "Starting contextual development tools installation..."
     print_info "Project directory: $project_dir"
     print_info "Agent: $agent"
     print_info "Contextual target: $contextual_target"
+    if [[ -n "$include_commands" ]]; then
+        print_info "Including only: $include_commands"
+    fi
     
     # Create project directory
     create_project_directory "$project_dir"
@@ -496,7 +557,7 @@ install_contextual() {
     copy_contextual_files "$project_dir" "$contextual_target"
     
     # Install commands and create symlinks
-    install_agent_commands "$project_dir" "$agent" "$contextual_target"
+    install_agent_commands "$project_dir" "$agent" "$contextual_target" "$include_commands"
     
     # Validate installation
     if validate_installation "$project_dir" "$contextual_target" "$agent"; then
@@ -558,6 +619,10 @@ while [[ ${#flag_args[@]} -gt 0 ]]; do
             CONTEXTUAL_TARGET="${flag_args[1]}"
             flag_args=("${flag_args[@]:2}")
             ;;
+        --include)
+            INCLUDE_COMMANDS="${flag_args[1]}"
+            flag_args=("${flag_args[@]:2}")
+            ;;
         --help)
             show_usage
             exit 0
@@ -591,7 +656,7 @@ main() {
     fi
     
     # Run installation
-    install_contextual "$PROJECT_ROOT" "$AGENT" "$CONTEXTUAL_TARGET"
+    install_contextual "$PROJECT_ROOT" "$AGENT" "$CONTEXTUAL_TARGET" "$INCLUDE_COMMANDS"
 }
 
 # Run main function

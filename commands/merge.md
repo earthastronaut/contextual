@@ -1,8 +1,11 @@
 ---
 config:
-  SPECIFY_DIR: ./specs
   MAIN_BRANCH: main
-  MERGE_TEMPLATE: "Merge {FEATURE_BRANCH}: {DESCRIPTION}"
+  MERGE_TEMPLATE: |
+    Merge {FEATURE_BRANCH}: {DESCRIPTION}
+    - {commit_hash}: one line per commit included.
+    ...
+    spec: {FEATURE_CONTEXT}
 ---
 # Goal
 
@@ -28,15 +31,16 @@ ${ARGUMENTS}
 
 ## 2. Analyze Feature & Generate Commit Message
 
-1. Set `${FEATURE_CONTEXT}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
-2. Read specification from ${FEATURE_CONTEXT}
-   - If doesn't exist → STOP, tell user to run `/specify` first
-3. Review git log: `git log ${MAIN_BRANCH}..${CURRENT_BRANCH} --oneline`
-4. Consider user input and ${FEATURE_CONTEXT} to generate:
+1. Get changed files: `git diff --name-only ${MAIN_BRANCH}...${CURRENT_BRANCH}`
+2. Look for any `context.md` files in the changes
+3. If `context.md` files found → read them as ${FEATURE_CONTEXT}
+4. Review git log: `git log ${MAIN_BRANCH}..${CURRENT_BRANCH} --oneline`
+5. Consider user input and ${FEATURE_CONTEXT} to generate:
    - `${DESCRIPTION}` (2-3 sentences describing the feature)
-5. Set `${COMMIT_MESSAGE}` using ${MERGE_TEMPLATE}:
+6. Set `${COMMIT_MESSAGE}` using ${MERGE_TEMPLATE}:
    - Replace `{FEATURE_BRANCH}` with ${CURRENT_BRANCH}
    - Replace `{DESCRIPTION}` with ${DESCRIPTION}
+   - Replace `{FEATURE_CONTEXT}` with path to context.md file(s)
 
 ## 3. Execute Merge
 

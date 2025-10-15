@@ -1,6 +1,7 @@
 ---
 config:
-  SPECIFY_DIR: ./specs
+  SPECIFY_DIR: specs
+  CONTEXT_ROOT: README.md
   ANALYZE_EXCLUDE_PATTERNS:
     - cache
     - __pycache__
@@ -77,7 +78,12 @@ From user input, determine:
 - `${ANALYSIS_INPUT_DIRECTORY}` - directory to analyze (default: `.`)
 - `${ANALYSIS_DEPTH}` - analysis depth level (default: `standard`)
 
-## 3. Apply Exclude Patterns
+## 3. Read Global Context
+
+1. Always read `${CONTEXT_ROOT}` exists, read it for project overview
+2. Use this information when creating analysis summary and understanding project purpose
+
+## 4. Apply Exclude Patterns
 
 When analyzing directories and files:
 1. Set `${EXCLUDE_PATTERNS}` from config `ANALYZE_EXCLUDE_PATTERNS`
@@ -86,7 +92,7 @@ When analyzing directories and files:
 4. Always include items matching `${INCLUDE_PATTERNS}` (overrides exclude)
 5. Apply when scanning directories, counting files, and analyzing structure
 
-## 4. Perform Analysis
+## 5. Perform Analysis
 
 Create `${ANALYSIS_OUTPUT_DIR}` directory if needed.
 
@@ -373,7 +379,7 @@ maintainability_score: 0  # 1-10
 [Immediate / Short-term / Long-term actions]
 ```
 
-## 5. Create Analysis Summary
+## 6. Create Analysis Summary
 
 Create `${ANALYSIS_OUTPUT_DIR}/summary.md`:
 ```markdown
@@ -438,7 +444,7 @@ health:
 - [quality.md](./quality.md): Code quality, testing, and technical debt assessment (if created)
 ```
 
-## 6. Update Context
+## 7. Update Context
 
 1. Read `${FEATURE_CONTEXT}`
 2. Add or update "Project Analysis" section with:
@@ -446,7 +452,7 @@ health:
    - Brief note on analysis scope and depth
 3. DO NOT duplicate information from analysis files
 
-## 7. Validate Changes
+## 8. Validate Changes
 
 Before completing:
 1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
@@ -481,6 +487,10 @@ After running this command:
 4. Use `/implement` to execute the planned changes
 
 # Guidelines
+
+**Global Context:**
+- Always read `${CONTEXT_ROOT}` if it exists for project overview
+- Reference project goals and conventions from `${CONTEXT_ROOT}` in analysis where relevant.
 
 **Research Approach:**
 - Analyze and document, never implement changes to source code
