@@ -46,8 +46,10 @@ specs/{branch}/       # Feature specifications (auto-created when running /speci
 
 ## 🛠️ Installation
 
+### Standard Installation
+
 ```bash
-# Basic install
+# Basic install (creates .contextual directory with config and context)
 contextual install /path/to/project
 
 # With options
@@ -58,6 +60,26 @@ contextual update /path/to/project
 ```
 
 **Configuration**: Edit `.contextual/config.yaml` to customize. See the file for more details.
+
+### Commands-Only Installation
+
+For updating just the command files without a `.contextual` directory or configuration help.
+
+```bash
+# Install/update into `.cursor/commands/` directory
+contextual install /path/to/project --only-commands
+
+# Install specific commands only
+contextual install /path/to/project --only-commands --include specify.md,implement.md,commit.md
+
+# Install/update into `.claude/commands/` directory
+contextual install /path/to/project --only-commands --agent claude
+```
+
+**When to use `--only-commands`:**
+- When you want to simplify installation and avoid any `.contextual` directory.
+- When you only have one agent you're using and not sharing commands with other agents.
+- Commands are copied directly (no config variable replacement)
 
 ## 🔄 Workflow
 

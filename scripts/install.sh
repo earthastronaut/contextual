@@ -166,6 +166,7 @@ PROJECT_ROOT=""
 AGENT="$DEFAULT_AGENT"
 CONTEXTUAL_TARGET="$DEFAULT_CONTEXTUAL_ROOT"
 INCLUDE_COMMANDS=""
+ONLY_COMMANDS=false
 
 # Function to print colored output
 print_info() {
@@ -213,6 +214,8 @@ OPTIONS:
     --contextual-root PATH Contextual root directory (default: .contextual)
     --include COMMANDS     Comma-separated list of commands to include
                           Example: --include specify.md,implement.md,commit.md
+    --only-commands        Copy commands directly to agent folder without
+                          creating .contextual directory or symlinks
     --help                 Show this help message
 
 EXAMPLES:
@@ -221,6 +224,8 @@ EXAMPLES:
     $0 /path/to/project --agent claude
     $0 /path/to/project --contextual-root .dev-tools
     $0 /path/to/project --include specify.md,implement.md,commit.md
+    $0 /path/to/project --only-commands
+    $0 /path/to/project --only-commands --include specify.md,implement.md
 
 EOF
 }
@@ -483,6 +488,65 @@ install_agent_commands() {
     fi
 }
 
+# Function to install commands directly to agent folder (without .contextual)
+install_commands_only() {
+    local project_dir="$1"
+    local agent="$2"
+    local include_commands="$3"
+    
+    # Get agent-specific folder
+    local agent_folder="$(get_agent_folder "$agent")"
+    
+    if [[ -z "$agent_folder" ]]; then
+        print_error "Unknown agent: $agent. Cannot install commands."
+        return 1
+    fi
+    
+    local agent_commands_dir="$project_dir/$agent_folder"
+    
+    # Create agent commands directory if it doesn't exist
+    print_info "Setting up $agent commands directory..."
+    mkdir -p "$agent_commands_dir"
+    print_success "Created $agent_folder directory"
+    
+    # Copy command files directly to agent folder (only including specified commands if filter is set)
+    print_info "Installing command files directly to $agent_folder..."
+    print_info "Note: Commands copied without config variable replacement"
+    
+    if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
+        local installed_count=0
+        local skipped_count=0
+        for cmd_file in "$COMMANDS_SOURCE"/*.md; do
+            if [[ -f "$cmd_file" ]]; then
+                local cmd_name="$(basename "$cmd_file")"
+                if is_command_included "$cmd_name" "$include_commands"; then
+                    local target_path="$agent_commands_dir/$cmd_name"
+                    # Remove existing file or symlink if it exists
+                    if [[ -e "$target_path" ]] || [[ -L "$target_path" ]]; then
+                        rm -f "$target_path"
+                    fi
+                    cp "$cmd_file" "$agent_commands_dir/"
+                    installed_count=$((installed_count + 1))
+                else
+                    print_info "Skipping command: $cmd_name"
+                    skipped_count=$((skipped_count + 1))
+                fi
+            fi
+        done
+        if [[ $installed_count -gt 0 ]]; then
+            print_success "Command files installed ($installed_count installed, $skipped_count skipped)"
+        else
+            print_warning "No command files installed (all skipped)"
+            return 1
+        fi
+    else
+        print_error "No command files found in $COMMANDS_SOURCE"
+        return 1
+    fi
+    
+    return 0
+}
+
 # Function to validate installation
 validate_installation() {
     local project_dir="$1"
@@ -542,42 +606,70 @@ install_contextual() {
     print_info "Starting contextual development tools installation..."
     print_info "Project directory: $project_dir"
     print_info "Agent: $agent"
-    print_info "Contextual target: $contextual_target"
-    if [[ -n "$include_commands" ]]; then
-        print_info "Including only: $include_commands"
-    fi
     
-    # Create project directory
-    create_project_directory "$project_dir"
-    
-    # Setup agent-specific structure
-    setup_agent_structure "$project_dir" "$agent"
-    
-    # Copy contextual files
-    copy_contextual_files "$project_dir" "$contextual_target"
-    
-    # Install commands and create symlinks
-    install_agent_commands "$project_dir" "$agent" "$contextual_target" "$include_commands"
-    
-    # Validate installation
-    if validate_installation "$project_dir" "$contextual_target" "$agent"; then
-        print_success "Installation completed successfully!"
-        print_info "You can now use contextual development tools in your project."
-        print_info ""
-        print_info "Contextual directory: $project_dir/$contextual_target"
-        
-        local agent_folder="$(get_agent_folder "$agent")"
-        if [[ -n "$agent_folder" ]]; then
-            print_info "$agent commands: $project_dir/$agent_folder"
+    # Check if only commands mode is enabled
+    if [[ "$ONLY_COMMANDS" == true ]]; then
+        print_info "Mode: Direct copy (--only-commands)"
+        if [[ -n "$include_commands" ]]; then
+            print_info "Including only: $include_commands"
         fi
         
-        print_info ""
-        print_info "Configuration:"
-        print_info "  Config file: $project_dir/$contextual_target/config.yaml"
-        print_info "  Edit the config file to customize settings"
+        # Create project directory
+        create_project_directory "$project_dir"
+        
+        # Install commands directly to agent folder
+        if install_commands_only "$project_dir" "$agent" "$include_commands"; then
+            print_success "Installation completed successfully!"
+            print_info "Commands installed directly to agent folder without .contextual setup."
+            print_info ""
+            
+            local agent_folder="$(get_agent_folder "$agent")"
+            if [[ -n "$agent_folder" ]]; then
+                print_info "$agent commands: $project_dir/$agent_folder"
+            fi
+        else
+            print_error "Installation failed. Please check the output above."
+            exit 1
+        fi
     else
-        print_error "Installation validation failed. Please check the output above."
-        exit 1
+        # Standard installation with .contextual directory
+        print_info "Contextual target: $contextual_target"
+        if [[ -n "$include_commands" ]]; then
+            print_info "Including only: $include_commands"
+        fi
+        
+        # Create project directory
+        create_project_directory "$project_dir"
+        
+        # Setup agent-specific structure
+        setup_agent_structure "$project_dir" "$agent"
+        
+        # Copy contextual files
+        copy_contextual_files "$project_dir" "$contextual_target"
+        
+        # Install commands and create symlinks
+        install_agent_commands "$project_dir" "$agent" "$contextual_target" "$include_commands"
+        
+        # Validate installation
+        if validate_installation "$project_dir" "$contextual_target" "$agent"; then
+            print_success "Installation completed successfully!"
+            print_info "You can now use contextual development tools in your project."
+            print_info ""
+            print_info "Contextual directory: $project_dir/$contextual_target"
+            
+            local agent_folder="$(get_agent_folder "$agent")"
+            if [[ -n "$agent_folder" ]]; then
+                print_info "$agent commands: $project_dir/$agent_folder"
+            fi
+            
+            print_info ""
+            print_info "Configuration:"
+            print_info "  Config file: $project_dir/$contextual_target/config.yaml"
+            print_info "  Edit the config file to customize settings"
+        else
+            print_error "Installation validation failed. Please check the output above."
+            exit 1
+        fi
     fi
 }
 
@@ -622,6 +714,10 @@ while [[ ${#flag_args[@]} -gt 0 ]]; do
         --include)
             INCLUDE_COMMANDS="${flag_args[1]}"
             flag_args=("${flag_args[@]:2}")
+            ;;
+        --only-commands)
+            ONLY_COMMANDS=true
+            flag_args=("${flag_args[@]:1}")
             ;;
         --help)
             show_usage
