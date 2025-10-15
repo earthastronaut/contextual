@@ -1,5 +1,10 @@
+---
+config:
+  MAIN_BRANCH: main
+---
 # Goal
-Create a commit based on current changes.
+
+Create a git commit with a conventional commit message based on current changes.
 
 # User Input
 
@@ -7,57 +12,61 @@ Create a commit based on current changes.
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty). This may include the commit message or the files to commit.
+Optional: Commit message or specific files to stage.
 
 # Steps
 
-## 1. Check Current Git Status
-Check current status `git status --porcelain`
+## 1. Check Git Status
 
-## 2. Analyze the Changes
-Look at the file paths and determine the commit type. (`feat`, `fix`, `docs`, `refactor`, `test`, `chore`)
-- Guidelines
-    - Use directory name if changes are focused there
-    - Omit scope if changes span multiple areas
-    - Keep scope short and descriptive
+1. Run: `git status --porcelain` → `${CHANGED_FILES}`
+2. If no changes → notify user and exit
 
-## 3. Create Description
-Based on the main files changed:
-- Keep it concise and descriptive
-- Examples:
-  - "add merge command with prerequisites check"
-  - "update configuration utilities"
-  - "add new test cases"
-- Guidelines
-    - Start with lowercase letter
-    - Use present tense ("add" not "added")
-    - Be specific but concise
-    - Focus on the main change
+## 2. Generate Commit Message
 
-## 4. Format Commit Message
-Create commit message following conventional commits format:
-```text
-${TYPE}: ${DESCRIPTION}
-```
+**If user provided message:**
+- Use ${ARGUMENTS} as commit message
 
-Examples:
+**If no message provided:**
+1. Analyze ${CHANGED_FILES} to determine commit type:
+   - `feat` → New feature
+   - `fix` → Bug fix
+   - `docs` → Documentation only
+   - `refactor` → Code restructuring
+   - `test` → Test changes
+   - `chore` → Maintenance/tooling
+
+2. Create description:
+   - Use present tense ("add" not "added")
+   - Start with lowercase
+   - Be specific but brief
+
+3. Format: `${TYPE}: ${DESCRIPTION}`
+
+**Examples:**
 - `feat: add merge command with prerequisites check`
-- `fix: correct function name in validate_feature_setup`
 - `docs: update README with installation instructions`
-- `test: add unit tests for config utilities`
-- `chore: update dependencies`
+- `fix: correct function name in validation`
 
-## 5. Stage Changes
-Add all changes `git add .` or add specific files `git add path/to/file1 path/to/file2`
+## 3. Stage and Commit
 
-## 6. Commit
-Execute: `git commit -m "${COMMIT_MESSAGE}"`
+1. Stage changes:
+   - All: `git add .`
+   - Specific: `git add ${ARGUMENTS}` (if files specified)
+
+2. Commit: `git commit -m "${COMMIT_MESSAGE}"`
 
 # Output
-- Very concise summary of the commit
+
+Summary of commit with message and files changed.
 
 # Next Steps
-After running this command:
-1. Review the commit message
-2. Push the changes to the remote repository
-3. Use `/merge` to merge the changes to the main branch
+
+1. Push changes: `git push`
+2. Use `/merge` to merge to ${MAIN_BRANCH}
+
+# Guidelines
+
+**Commit Types:**
+- Use `feat` for new functionality, `fix` for bugs, `docs` for documentation
+- Omit scope unless changes are focused in one directory
+- Keep descriptions concise and action-oriented

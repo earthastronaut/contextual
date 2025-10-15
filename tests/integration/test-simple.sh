@@ -46,10 +46,17 @@ if bash "$INSTALL_SCRIPT" "$TEST_PROJECT" >/dev/null 2>&1; then
         exit 1
     fi
     
-    if [[ -f "$TEST_PROJECT/.contextual/README.md" ]]; then
-        echo "✓ README.md exists"
+    if [[ -d "$TEST_PROJECT/.contextual/commands" ]]; then
+        echo "✓ .contextual/commands directory exists"
     else
-        echo "✗ README.md missing"
+        echo "✗ .contextual/commands directory missing"
+        exit 1
+    fi
+    
+    if [[ -f "$TEST_PROJECT/.contextual/config.yaml" ]]; then
+        echo "✓ config.yaml exists"
+    else
+        echo "✗ config.yaml missing"
         exit 1
     fi
     

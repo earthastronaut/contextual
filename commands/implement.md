@@ -1,5 +1,10 @@
+---
+config:
+  SPECIFY_DIR: ./specs
+---
 # Goal
-Implement the feature based on the context and all linked files.
+
+Implement tasks from spec (spec-driven) OR execute a one-off task (ad-hoc).
 
 # User Input
 
@@ -7,64 +12,94 @@ Implement the feature based on the context and all linked files.
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty).
-
 # Steps
 
-## 1. Prerequisites
-Execute: `.contextual/scripts/bash/implement.sh`
-This will output:
-- ${FEATURE_CONTEXT}: The context file path
+## 1. Find Specification
 
-## 2. Analyze Context
-1. **Find all linked files**: Scan ${FEATURE_CONTEXT} for links and follow recursively (depth limit: 3)
-   - **Link patterns**: `[text](path)`, `@filename`, `./path`, `[[internal]]`, `{{var}}`, `$VAR`
-   - **File types**: .md, .txt, .json, .yaml, .js, .ts, .py, .sh, .png
-   - **Handle**: Markdown links, reference links, directory links (→ README.md)
-   - **Skip**: External URLs, binary files
-2. **Read all files**: Extract content and parse for additional links
+1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
+2. Verify not on `main` - if on main, STOP
+3. Set `${FEATURE_CONTEXT}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
+4. If context doesn't exist → tell user to run `/specify` first
 
-## 3. Extract Tasks Loop
-Sequential loop
-1. **Scan files** for task patterns:
-   - **Checkbox tasks**: `- [ ]`, `* [ ]`, `+ [ ]`
-   - **Ignore Complete Checkbox tasks**: `- [x]`, `* [x]`, `+ [x]`
-   - **Priority markers**: `[HIGH]`, `[MEDIUM]`, `[LOW]`, `[CRITICAL]`
-   - **Status indicators**: `TODO:`, `FIXME:`, `NOTE:`, `REQUIREMENT:`
-2. **Extract task context**: Capture description, source file, dependencies, priority, completion status
+## 2. Determine Mode (Use Judgment)
 
-## 4. Organize Tasks into Phases
-For all tasks
-1. **Categorize by priority**: Group by High/Medium/Low priority and dependencies
-2. **Create master task list**: Consolidate all tasks into implementation phases based on logically dependencies
+Read ${FEATURE_CONTEXT} first, then decide:
 
-## 5. Execute Implementation
-1. **Update progress**: Mark completed tasks as `[x]` in ALL relevant files
-2. **Handle errors gracefully**: Continue with independent tasks if some fail (halt only on critical failures)
-3. **Validate**: Check against acceptance criteria from all sources
+**When user input specifies existing phase, task, or section:**
+- → Spec-Driven Mode (3B)
+- Filter and implement only matching tasks
+- Examples: "phase 1", "task 2", "authentication tasks"
 
-## 6. Error Handling
-- **Missing context/files**: Note missing dependencies and continue with available tasks
-- **Broken links**: Document issues and work with available information
-- **Circular references**: Detect and break infinite loops in link chains
-- **Task failures**: Update all relevant files with error notes and progress
+**When user input is a new instruction:**
+- → One-Off Mode (3A)
+- Implement as ad-hoc task and track it
+- Examples: "update README", "add error handling", "fix typo"
 
-# Output
-- Progress updates during execution
-- Final summary with suggested commit: `"feat: implement ${FEATURE}"`
-- Updated ${FEATURE_CONTEXT} and all linked files with completed task markers
+**Otherwise if uncertain or user input is empty:**
+- → Spec-Driven Mode (3B)
+- Implement next phase of uncompleted tasks
+
+## 3A. One-Off Task Mode
+
+1. Implement the task (${ARGUMENTS})
+2. Track in ${FEATURE_CONTEXT}:
+   - Create "# Additional Tasks" section if needed
+   - Add `- [x] ${ARGUMENTS}`
+3. Skip to Output (step 4)
+
+## 3B. Spec-Driven Mode
+
+1. **Find linked files**: Scan ${FEATURE_CONTEXT} for links, follow recursively (depth: 3)
+   - Patterns: `[text](path)`, `@file`, `./path`, `[[link]]`, `$VAR`
+   - Types: .md, .txt, .json, .yaml, .js, .ts, .py, .sh
+   - Skip: External URLs, binaries
+
+2. **Extract tasks** from all files:
+   - Uncompleted: `- [ ]`, `* [ ]`, `+ [ ]`
+   - Ignore completed: `- [x]`, `* [x]`, `+ [x]`
+   - Markers: `[HIGH]`, `[MEDIUM]`, `[LOW]`, `[CRITICAL]`, `TODO:`, `FIXME:`
+
+3. **Filter tasks** (if user input provided):
+   - Phase/section name → tasks in that section
+   - Task number → specific task
+   - Keywords → matching descriptions
+   - None → next phase of uncompleted tasks
+
+4. **Execute**:
+   - Organize by priority and dependencies
+   - Implement tasks, mark `[x]` in relevant files after each
+   - Continue on errors (halt only for critical failures)
+
+## 4. Output
+
+**One-Off Mode:**
+- Task complete: `- [x] ${ARGUMENTS}` in "# Additional Tasks" section of ${FEATURE_CONTEXT}
+
+**Spec-Driven Mode:**
+- Concise summary of progress
+- All files updated with `[x]` markers
+- Suggested commit message: `"feat: implement ${FEATURE}"`
 
 # Next Steps
+
 After running this command:
-1. Review the implementation results and validate against acceptance criteria
-2. Update any remaining incomplete tasks
-3. Commit changes with the suggested commit message
-4. Use `/clarify` if any ambiguities arise during implementation
-5. Use `/plan` to create additional implementation phases if needed
+1. Review implementation results
+2. Use `/commit` to save changes
+3. Use `/clarify` if ambiguities arise
 
 # Guidelines
-- **Task tracking**: Mark completed tasks as `[x]` in ALL relevant files
-- **Error handling**: Continue with independent tasks if some fail (halt only on critical failures)
-- **Validation**: Check against acceptance criteria from all sources
-- **Progress updates**: Update all relevant files with error notes and progress
-- **Scope boundaries**: Only modify files within the project scope, not specification files
+
+**Mode Selection:**
+1. Read ${FEATURE_CONTEXT} to see what tasks exist
+2. If input references spec (phase/task/keyword) → Spec-driven
+3. If input is new instruction → One-off
+4. If no input → Spec-driven (all tasks)
+
+**Task Tracking:**
+- Spec-driven: Mark `[x]` in ALL files containing the task
+- One-off: Add to "# Additional Tasks" section
+
+**Error Handling:**
+- Continue on non-critical failures
+- Document issues
+- Only halt for critical errors

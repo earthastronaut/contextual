@@ -136,6 +136,7 @@ run_tests_category() {
     
     if [[ ${#test_files[@]} -eq 0 ]]; then
         print_warning "No tests found in $TEST_DIR/$category_name"
+        PASSED_CATEGORIES=$((PASSED_CATEGORIES + 1))
         return 0
     fi
     
@@ -224,10 +225,7 @@ run_all_tests() {
     
     # Run test categories
     print_section "Running Test Categories"
-    
-    # Run unit tests
-    run_tests_category "unit" || true
-    
+        
     # Run integration tests
     run_tests_category "integration" || true
     

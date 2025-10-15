@@ -7,8 +7,9 @@
 ## 🚀 Features
 
 - **Spec-Driven Development**: Create, clarify, and implement features using structured specifications
+- **AI-Driven Workflow**: Pure markdown commands interpreted by AI - no bash scripts required
 - **AI Agent Integration**: Seamless integration with Cursor and other AI development tools
-- **Automated Workflow**: Streamlined commands for specification, implementation, and merging
+- **Intelligent Automation**: AI handles workflow logic, context management, and task execution
 - **Project Setup**: Easy installation and configuration for new projects
 - **Comprehensive Testing**: Built-in test suite with automated validation
 - **Git Integration**: Automated branch management and merge workflows
@@ -16,129 +17,97 @@
 ## 🚀 Quick Start
 
 ```bash
-# Clone the repository
-git clone https://github.com/contextual/contextual.git
-cd contextual
-
-# Install .contextual and commands into your project
+# Install into your project
 ./contextual install /path/to/your/project
 
-# Start a new feature
-# /specify add contextualize
-# /implement
-# /commit
-# /merge
+# Create a feature branch
+git checkout -b feature/add-user-authentication
+
+# Run these commands
+/specify description of the feature you want to add
+/implement
+/commit
+/merge
 ```
 
-## 📦 Structure
-
-Within your project, this will add or update the following files:
+## 📦 What Gets Installed
 
 ```
-.contextual/
-├── context/                 # Your project's context files (not modified on update)
-├── scripts/                 # Workflow scripts for commands to use.
-├── templates/               # Templates for commands and scripts to use.
-└── config                   # Configuration of your project for contextual.
-.{agent}/                   # Agent-specific folder (varies by AI agent)
-└── commands/               # AI agent commands (e.g., /specify, /implement, etc.)
+{agent}/commands/      # AI commands linked from .contextual/commands/
+.contextual/          # Configuration and utilities
+|-- commands/         # AI commands (/specify, /implement, etc.)
+|-- config.yaml       # Configuration file
+|-- context/          # Global context storage
+specs/{branch}/       # Feature specifications (auto-created when running /specify)
 ```
 
-**Supported AI agents**: cursor, claude, gemini, copilot, windsurf, roo, auggie, q, and more.
-Default agent is `cursor` (creates `.cursor/commands/`)
+**Supported AI agents**: cursor, claude, gemini, copilot, windsurf, roo, auggie, q
+(Default: cursor)
 
-## 🛠️ Usage
-
-### Basic Commands
+## 🛠️ Installation
 
 ```bash
-# Show help
-contextual help
-
-# Show version
-contextual version
-
-# Install contextual tools into a project
+# Basic install
 contextual install /path/to/project
 
-# Update your project with new features
-contextual update /path/to/your/project
+# With options
+contextual install /path/to/project --agent cursor --contextual-root .dev-tools
+
+# Update existing installation
+contextual update /path/to/project
 ```
 
-### Installation Options
+**Configuration**: Edit `.contextual/config.yaml` to customize. See the file for more details.
+
+## 🔄 Workflow
+
+
+### Create a feature branch
+
+The workflow starts by you creating a feature branch with the name you want.
 
 ```bash
-# Install with custom agent (default: cursor)
-contextual install /path/to/project --agent cursor
-
-# Install with custom contextual root directory
-contextual install /path/to/project --contextual-root .dev-tools
+git checkout -b feature/add-user-authentication
 ```
 
-### Configuration
+### Core Commands
 
-After installation, you can customize the behavior by editing `.contextual/config` and uncommenting/modifying the variables:
+These are the core commands you can use to build the feature.
 
 ```bash
-# Edit the config file
-vim .contextual/config
+/contextualize                          # Clarify global context information (optional)
+/specify add user authentication        # Create spec
+/clarify add OAuth support              # Refine spec (optional)
+/plan                                   # Create detailed implementation plan (optional)
+/analyze backend/auth                   # Analyze folder (optional)
+/task description of something to do    # One-off task (optional)
+/implement                              # Build the feature
+/commit                                 # Commit changes (optional)
+/merge                                  # Squash merge to main (optional)
 ```
 
-Available configuration options:
-- `GIT_REPO_ROOT` - Git repository root path
-- `CONTEXTUAL_ROOT` - Contextual root directory (default: `.contextual`)
-- `CONTEXT_DIR` - Context files directory (default: `.contextual/context`)
-- `CONTEXT_ROOT` - Main context file (default: `.contextual/context/README.md`)
-- `SPECS_DIR` - Specifications directory (default: `./specs`)
-- `MAIN_BRANCH` - Main branch name for merges (default: `main`)
-- `MERGE_TEMPLATE` - Merge commit message template (default: `Merge {FEATURE_BRANCH}: {DESCRIPTION}`)
+### Quick Tasks
 
-You can also set these as environment variables with the `CONTEXTUAL_` prefix (e.g., `CONTEXTUAL_MAIN_BRANCH=develop`).
+These are for quick one-off tasks which can be added to the feature context file.
 
-## 🔄 Development Workflow
+```bash
+/implement fix typo in login form   # Decides if this is a one-off or spec-driven task
+/task fix typo in login form        # More explicit one-off task
+```
 
-Contextual Development Tools follows a spec-driven development approach:
+## 🎯 How It Works
 
-### 1. Specify a Feature
-Use `/specify feature description` to create new feature specifications which creates a context.md file and a feature branch.
+- **AI-Driven**: Commands are markdown prompts interpreted by AI (no bash scripts)
+- **Spec Commands**: `/specify`, `/clarify`, `/plan` → Update docs in `specs/` only
+- **Implementation**: `/implement` → Makes actual code changes
+- **Git Operations**: `/commit`, `/merge` → Save and integrate work
 
-### 2. Implement the Feature
-Use `/implement` command to implement any tasks from the context.md file.
+## 📚 More Info
 
-### 3. Commit Changes
-Use `/commit` command to commit the changes. This will commit the changes to the feature branch with a generated commit message.
-
-### 4. Merge the Changes
-Use `/merge` command to squash merge the changes into the main branch (configurable by `MAIN_BRANCH` in `.contextual/config`). This will merge the changes into the main branch with a generated commit message.
-
-## Optional Commands
-
-The main file for changes is the context.md file. This is the file that will be used to track the changes and the progress of the feature. These optional commands modify that context.md file. Note that it's best to keep the context.md file small and focused on the feature.
-
-### Clarify Requirements
-Use `/clarify` command to clarify the requirements of the feature. This will prompt you for any missing information and update the feature's context.md file.
-
-### Analyze Project Structure
-Use `/analyze` command to analyze the project structure and add it to the feature's context.md file.
-
-### Plan Implementation
-Use `/plan` command to create a plan and add it to the feature's context.md file.
-
-## 📚 Additional Documentation
-
-- [Contributions](docs/contributions.md) - How to contribute to the project
-- [Test Documentation](tests/README.md) - Comprehensive testing guide
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built for the AI-assisted development community
-- Designed to work seamlessly with Cursor and other AI coding assistants
-- Inspired by [spec-kit](https://github.com/spec-kit) and spec-driven development practices
+- [Contributions Guide](docs/contributions.md) | [Tests](tests/README.md)
+- [MIT License](LICENSE)
+- Inspired by [spec-kit](https://github.com/spec-kit)
 
 ---
 
-**Made with ❤️ for developers who love AI-assisted coding**
+**Made with ❤️ for AI-assisted development**

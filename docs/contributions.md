@@ -53,6 +53,12 @@ chmod +x contextual
 ```
 contextual/
 ├── contextual                 # Main CLI entrypoint
+├── commands/                  # AI-driven command definitions (markdown)
+│   ├── specify.md            # Create feature specifications
+│   ├── implement.md          # Implement features
+│   ├── commit.md             # Commit changes
+│   ├── merge.md              # Merge branches
+│   └── ...                   # Other workflow commands
 ├── scripts/                   # Core functionality scripts
 │   ├── install.sh            # Project installation script
 │   └── run-tests.sh          # Test runner
@@ -62,15 +68,15 @@ contextual/
 │   └── 0003-merge-command/
 ├── tests/                     # Test suite
 │   ├── README.md             # Test documentation
-│   ├── simple-test.sh        # Basic functionality tests
-│   └── install-test.sh       # Installation tests
+│   ├── integration/          # Integration tests
+│   └── utils/                # Test utilities
 ├── docs/                      # Additional documentation
 ├── .contextual/              # Contextual development tools
-│   ├── scripts/              # Workflow automation scripts
-│   ├── templates/            # Specification templates
+│   ├── commands/             # Installed command files (symlinked to agent folders)
+│   ├── config.yaml           # Configuration file
 │   └── context/              # Global context storage
 ├── .cursor/                  # Cursor AI agent integration
-│   └── commands/             # Cursor command definitions
+│   └── commands/             # Symlinks to .contextual/commands
 └── LICENSE                   # MIT License
 ```
 
@@ -143,15 +149,19 @@ For detailed test documentation, see [tests/README.md](tests/README.md).
 
 ### Development Workflow
 
+This project uses an AI-driven, spec-driven development workflow:
+
 1. Create a new feature specification using `/specify`
-2. Clarify requirements using `/clarify`
-3. Analyze project structure using `/analyze`
-4. Plan implementation using `/plan`
+2. (Optional) Clarify requirements using `/clarify`
+3. (Optional) Analyze project structure using `/analyze`
+4. (Optional) Plan implementation using `/plan`
 5. Implement the feature using `/implement`
 6. Test your changes with `./contextual run-tests`
 7. Commit changes using `/commit`
 8. Merge changes using `/merge`
 9. Submit a pull request
+
+**Note**: All commands are AI-driven markdown prompts. The AI interprets them and performs the necessary actions without requiring bash scripts.
 
 ### Best Practices
 
@@ -206,6 +216,6 @@ ls -la /path/to/your/project
 ## 📚 Additional Resources
 
 - [Main README](../README.md) - Project overview and usage
-- [Test Documentation](tests/README.md) - Comprehensive testing guide
-- [Specification Templates](../.contextual/templates/) - Templates for feature specifications
-- [Cursor Commands](../.cursor/commands/) - AI agent command definitions
+- [Test Documentation](../tests/README.md) - Comprehensive testing guide
+- [Command Definitions](../commands/) - AI-driven command markdown files
+- [Configuration](../.contextual/config.yaml) - Project configuration

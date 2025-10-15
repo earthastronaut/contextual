@@ -1,5 +1,12 @@
+---
+config:
+  SPECIFY_DIR: ./specs
+  MAIN_BRANCH: main
+  MERGE_TEMPLATE: "Merge {FEATURE_BRANCH}: {DESCRIPTION}"
+---
 # Goal
-Analyze the current feature branch and spec to generate a summary commit message, then execute a merge script that performs a squash merge to the main branch.
+
+Analyze the current feature branch and spec to generate a summary commit message, then perform a squash merge to main branch.
 
 # User Input
 
@@ -7,38 +14,66 @@ Analyze the current feature branch and spec to generate a summary commit message
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty).
-
 # Steps
 
-## 1. Prerequisites
-Execute: `.contextual/scripts/bash/merge-prerequisites.sh`
-This will output:
-- ${CURRENT_BRANCH}: The current branch name
-- ${MERGE_TEMPLATE}: The template for the commit message
+## 1. Check Prerequisites
 
-## 2. Analyze Feature
-- Use current changes, the git log, and User Input to generate a summary commit message called ${DESCRIPTION}
-- Use ${MERGE_TEMPLATE} and ${DESCRIPTION} to generate a concise commit message called ${COMMIT_MESSAGE}
+1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
+2. Set `${MAIN_BRANCH}` = `main` (from config)
+3. Verify NOT on ${MAIN_BRANCH} - if on main, STOP with error
+4. Check for uncommitted changes: `git diff-index --quiet HEAD --`
+   - If uncommitted changes exist → STOP, tell user to commit first
+5. Check for untracked files: `git ls-files --others --exclude-standard`
+   - If untracked files exist → WARN user but continue
+
+## 2. Analyze Feature & Generate Commit Message
+
+1. Set `${FEATURE_CONTEXT}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
+2. Read specification from ${FEATURE_CONTEXT}
+   - If doesn't exist → STOP, tell user to run `/specify` first
+3. Review git log: `git log ${MAIN_BRANCH}..${CURRENT_BRANCH} --oneline`
+4. Consider user input and ${FEATURE_CONTEXT} to generate:
+   - `${DESCRIPTION}` (2-3 sentences describing the feature)
+5. Set `${COMMIT_MESSAGE}` using ${MERGE_TEMPLATE}:
+   - Replace `{FEATURE_BRANCH}` with ${CURRENT_BRANCH}
+   - Replace `{DESCRIPTION}` with ${DESCRIPTION}
 
 ## 3. Execute Merge
-- Execute: `.contextual/scripts/bash/merge.sh --message "${COMMIT_MESSAGE}"`
-- Errors are handled by the merge script and exit if any errors occur
+
+1. Checkout main: `git checkout ${MAIN_BRANCH}`
+   - If fails → STOP with error
+2. Squash merge: `git merge --squash ${CURRENT_BRANCH}`
+   - If conflicts → STOP, tell user to resolve manually
+3. Commit: `git commit -m "${COMMIT_MESSAGE}"`
+   - If fails → STOP with error
+4. Report success
 
 # Output
-- Successful merge to main branch
+
+Summary:
+- Successful merge to ${MAIN_BRANCH} branch
 - Squashed commit with generated message
 - Feature branch remains for manual cleanup
 
 # Next Steps
+
 After running this command:
 1. Review the merge results
 2. Verify the commit message is appropriate
 3. Clean up feature branch if desired (manual cleanup)
 
 # Guidelines
-- **Feature Branch Required**: Command must be run from a feature branch
-- **Spec File Required**: Feature specification file must exist
-- **Error Handling**: Abort on conflicts and show detailed error messages
-- **No Branch Cleanup**: Feature branch is left intact for manual cleanup
-- **No Task Validation**: Merge proceeds regardless of task completion status
+
+**Prerequisites:**
+- Must be run from feature branch (not ${MAIN_BRANCH})
+- Feature specification file must exist
+- No uncommitted changes allowed
+
+**Merge Behavior:**
+- Squash merge combines all commits into one
+- Feature branch left intact for manual cleanup
+- No automatic task validation (merges regardless of completion status)
+
+**Error Handling:**
+- Abort on conflicts and show detailed error messages
+- Stop on any git operation failures

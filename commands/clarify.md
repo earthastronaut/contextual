@@ -1,5 +1,26 @@
+---
+config:
+  SPECIFY_DIR: ./specs
+---
 # Goal
-Update the feature context. Identify and resolve ambiguous areas in the feature ${FEATURE_CONTEXT}. DO NOT MODIFY the source code only the files within the `./specs/` directory. DO NOT IMPLEMENT THE FEATURE ONLY CREATE THE SPECIFICATION.
+
+Update the feature specification based on user input or resolve clarification markers.
+
+**CRITICAL CONSTRAINT: ONLY MODIFY FILES IN `${SPECIFY_DIR}/${CURRENT_BRANCH}/`**
+
+This command updates **SPECIFICATION DOCUMENTS**, DO NOT MODIFY SOURCE CODE!
+
+**User input interpretation:**
+- "implement X" → Add X to the spec
+- "change Y" → Update spec to include Y  
+- You document requirements, you don't code them
+
+**ALLOWED MODIFICATIONS:**
+- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/` files only
+
+**FORBIDDEN (NEVER TOUCH):**
+- ❌ `commands/*.md`, `README.md`, source code, config files
+- ❌ ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
 
 # User Input
 
@@ -7,89 +28,90 @@ Update the feature context. Identify and resolve ambiguous areas in the feature 
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty).
+**How to interpret user input:**
+- Focus on **WHAT** needs to be in the specification
+- Ignore action verbs: "implement", "change", "update", "fix", "create"
+- Extract the **intent**: what feature/requirement needs specifying
+- Update specification with this information
+- DO NOT make actual code changes
 
 # Steps
 
-## 1. Prerequisites
-Execute: `.contextual/scripts/bash/clarify.sh`
-This will output:
-- ${FEATURE_CONTEXT}: The context file path
+## 1. Find Specification
 
-## 2. Load Spec File
-Analyze ${FEATURE_CONTEXT}. Perform a structured ambiguity & coverage scan using this taxonomy. For each category, mark status: Clear / Partial / Missing:
+1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
+2. Set `${FEATURE_CONTEXT}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
+3. If doesn't exist → tell user to run `/specify` first
 
-   **Functional Scope & Behavior**: Core user goals, success criteria, out-of-scope declarations, user roles
-   **Domain & Data Model**: Entities, attributes, relationships, identity rules, lifecycle transitions
-   **Interaction & UX Flow**: Critical user journeys, error/empty/loading states, accessibility
-   **Non-Functional Quality**: Performance, scalability, reliability, observability, security, compliance
-   **Integration & Dependencies**: External services/APIs, data formats, protocol assumptions
-   **Edge Cases & Failure**: Negative scenarios, rate limiting, conflict resolution
-   **Constraints & Tradeoffs**: Technical constraints, explicit tradeoffs
-   **Terminology & Consistency**: Canonical glossary terms, avoided synonyms
-   **Completion Signals**: Acceptance criteria testability, measurable Definition of Done
+## 2. Read Current State
 
-## 3. Generate Clarification Questions
-Generate a prioritized queue of candidate clarification questions (maximum 5):
-   - Each question must be answerable with multiple-choice (2-5 options) OR short answer (≤5 words)
-   - Only include questions that materially impact architecture, data modeling, test design, UX behavior, or compliance
-   - Favor clarifications that reduce downstream rework risk
-   - If more than 5 categories remain unresolved, select top 5 by (Impact * Uncertainty) heuristic
+Read `${FEATURE_CONTEXT}` and related files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
 
-## 4. Sequential Questioning Loop
-Sequential questioning loop (interactive):
-   - Present EXACTLY ONE question at a time
-   - For multiple-choice: render options as Markdown table with A/B/C options + "Short" for free-form
-   - For short-answer: output "Format: Short answer (≤5 words)"
-   - After user answers: validate answer maps to option or fits constraint
-   - Stop when: all critical ambiguities resolved, user signals completion, or 5 questions reached
-   - Never reveal future queued questions in advance
+## 3. Update Specification
 
-## 5. Integration After Each Answer
-Integration after EACH accepted answer:
-   - Ensure `## Clarifications` section exists with `### Session YYYY-MM-DD` subheading
-   - Append bullet: `- Q: <question> → A: <final answer>`
-   - Apply clarification to appropriate section(s) in ${FEATURE_CONTEXT} file:
-     * Functional ambiguity → Update Functional Requirements
-     * User interaction → Update User Stories or Actors
-     * Data shape → Update Data Model
-     * Non-functional → Add/modify Quality Attributes
-     * Edge case → Add to Edge Cases / Error Handling
-     * Terminology → Normalize term across spec
-   - Save ${FEATURE_CONTEXT} file AFTER each integration
-   - Preserve formatting and heading hierarchy
+**If user provided input:**
+1. Determine what needs to be SPECIFIED (not implemented)
+2. Update relevant sections in `${FEATURE_CONTEXT}`:
+   - Overview, Scope, Solution, Tasks
+3. Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas
+4. Keep organized and non-redundant
 
-## 6. Validation
-Validation (after EACH write plus final pass):
-   - Clarifications session contains exactly one bullet per accepted answer
-   - Total asked questions ≤ 5
-   - Updated sections contain no lingering vague placeholders
-   - No contradictory statements remain
-   - Markdown structure valid
+**If NO user input:**
+1. Find `[NEEDS CLARIFICATION: question?]` markers
+2. Present ONE question at a time with options:
+   ```
+   | Option | Answer |
+   |--------|--------|
+   | A      | [first option] |
+   | B      | [second option] |
+   | Short  | [custom answer] |
+   ```
+3. Wait for answer (A/B/Short), update spec, continue (max 7 per session)
+4. If none found → report complete, suggest next steps
 
-## 7. Report Completion
-Concise report completion:
-   - Number of questions asked & answered
-   - Path to updated ${FEATURE_CONTEXT} file
-   - Coverage summary table with Status: Resolved/Deferred/Clear/Outstanding
-   - Suggested next command
+## 4. Validate Changes
+
+Before completing:
+1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+2. Verify ${FEATURE_CONTEXT} has clear, actionable information
+3. Check no source code or command files were touched
 
 # Output
-- Updated ${FEATURE_CONTEXT} file with clarifications integrated into appropriate sections
-- `## Clarifications` section with session subheading and Q&A format
-- Resolved ambiguities marked as clear in the specification
-- Coverage summary table showing status of all categories
+
+Summary:
+- Sections modified
+- New information added
+- Remaining clarifications needed
+- Updated file: `${FEATURE_CONTEXT}`
+
+# ⚠️ FINAL CHECKPOINT ⚠️
+
+**Before you finish, verify:**
+- [ ] Modified ONLY `${SPECIFY_DIR}/${CURRENT_BRANCH}/` files
+- [ ] Did NOT touch command/source/config files
+- [ ] Updated specification, NOT implementation
+
+**If you modified ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`, you did it WRONG.**
 
 # Next Steps
+
 After running this command:
-1. Review the updated ${FEATURE_CONTEXT} file for completeness
-2. Use `/plan` to create implementation plan if all clarifications are resolved
-3. Use `/analyze` to examine project structure if needed
-4. Use `/implement` to begin implementation once planning is complete
+1. Review updated `${FEATURE_CONTEXT}`
+2. Run `/clarify` again if more clarifications needed
+3. Use `/plan` to create implementation plan
+4. Use `/implement` to execute tasks
 
 # Guidelines
-- **Create Clarifications section**: Add `## Clarifications` section if missing in ${FEATURE_CONTEXT} file
-- **Add session tracking**: Add session subheading with date
-- **Update spec sections**: Update appropriate spec sections in ${FEATURE_CONTEXT} file
-- **Remove contradictions**: Remove contradictory statements
-- **Preserve structure**: Preserve formatting and structure
+
+**Specification Updates:**
+- Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas
+- Use `- [ ]` for incomplete tasks
+- Focus on WHAT to specify, not HOW to implement
+- Keep sections distinct, no duplication
+- Make requirements concrete and measurable
+
+**File Modification Rules:**
+- ✅ ONLY edit files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+- ❌ NEVER touch source code, commands, configs
+- This command updates documentation, NOT implementation
+- When in doubt, you're probably modifying the wrong file

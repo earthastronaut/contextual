@@ -105,7 +105,7 @@ test_directory_structure() {
     local target_dir="$project_dir/$contextual_target"
     
     # Test main directories
-    local required_dirs=("$target_dir" "$target_dir/context" "$target_dir/scripts" "$target_dir/templates" "$project_dir/.cursor" "$project_dir/.cursor/commands")
+    local required_dirs=("$target_dir" "$target_dir/context" "$target_dir/commands" "$project_dir/.cursor" "$project_dir/.cursor/commands")
     
     for dir in "${required_dirs[@]}"; do
         if [[ -d "$dir" ]]; then
@@ -165,8 +165,12 @@ test_new_project() {
         test_directory_structure "$test_name" "$project_dir"
         
         # Test specific files
-        test_file_exists "$test_name" "$project_dir/.contextual/README.md"
-        test_file_exists "$test_name" "$project_dir/.contextual/config"
+        # Check for config.yaml
+        if [[ -f "$project_dir/.contextual/config.yaml" ]]; then
+            print_test_result "$test_name" "PASS" "config.yaml exists"
+        else
+            print_test_result "$test_name" "FAIL" ".contextual/config.yaml not found"
+        fi
         test_file_exists "$test_name" "$project_dir/.cursor/commands/specify.md"
         test_file_exists "$test_name" "$project_dir/.cursor/commands/implement.md"
         

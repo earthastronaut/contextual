@@ -36,6 +36,124 @@ get_agent_folder() {
     esac
 }
 
+# Function to parse YAML config value (simple parser for basic values)
+parse_yaml_value() {
+    local config_file="$1"
+    local key="$2"
+    
+    if [[ ! -f "$config_file" ]]; then
+        echo ""
+        return
+    fi
+    
+    # Simple YAML parser that handles basic key-value pairs and arrays
+    local value=""
+    local in_array=false
+    local array_key=""
+    
+    while IFS= read -r line; do
+        # Skip comments and empty lines
+        if [[ "$line" =~ ^[[:space:]]*# ]] || [[ -z "$line" ]]; then
+            continue
+        fi
+        
+        # Check if this is the key we're looking for
+        if [[ "$line" =~ ^[[:space:]]*${key}:[[:space:]]*(.*)$ ]]; then
+            value="${BASH_REMATCH[1]}"
+            # If value is empty, might be an array
+            if [[ -z "$value" ]]; then
+                in_array=true
+                array_key="$key"
+            fi
+            break
+        fi
+    done < "$config_file"
+    
+    # If we found an array, collect all items
+    if [[ "$in_array" == true ]]; then
+        local array_items=()
+        local reading_array=false
+        while IFS= read -r line; do
+            # Start reading array items after the key
+            if [[ "$line" =~ ^[[:space:]]*${array_key}:[[:space:]]*$ ]]; then
+                reading_array=true
+                continue
+            fi
+            
+            # Stop if we hit a new top-level key
+            if [[ "$reading_array" == true ]] && [[ "$line" =~ ^[[:space:]]*[a-zA-Z_]+:[[:space:]]*.*$ ]] && [[ ! "$line" =~ ^[[:space:]]*- ]]; then
+                break
+            fi
+            
+            # Collect array items
+            if [[ "$reading_array" == true ]] && [[ "$line" =~ ^[[:space:]]*-[[:space:]]*(.+)$ ]]; then
+                local item="${BASH_REMATCH[1]}"
+                # Remove quotes if present
+                item=$(echo "$item" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+                array_items+=("$item")
+            fi
+        done < "$config_file"
+        
+        # Join array items with newlines and proper YAML formatting
+        if [[ ${#array_items[@]} -gt 0 ]]; then
+            printf "%s\n" "${array_items[@]}"
+            return
+        fi
+    fi
+    
+    echo "$value"
+}
+
+# Function to replace config variables in command file
+replace_config_variables() {
+    local cmd_file="$1"
+    local config_file="$2"
+    
+    if [[ ! -f "$cmd_file" ]] || [[ ! -f "$config_file" ]]; then
+        return
+    fi
+    
+    # Create a temporary file for processing
+    local temp_file="${cmd_file}.tmp"
+    cp "$cmd_file" "$temp_file"
+    
+    # Map config.yaml keys to command frontmatter keys
+    # SPECIFY_DIR -> SPECS_DIR
+    local specs_dir=$(parse_yaml_value "$config_file" "SPECS_DIR")
+    if [[ -n "$specs_dir" ]]; then
+        sed -i.bak "s|SPECIFY_DIR: .*|SPECIFY_DIR: $specs_dir|g" "$temp_file"
+        rm -f "${temp_file}.bak"
+    fi
+    
+    # MAIN_BRANCH -> MAIN_BRANCH
+    local main_branch=$(parse_yaml_value "$config_file" "MAIN_BRANCH")
+    if [[ -n "$main_branch" ]]; then
+        sed -i.bak "s|MAIN_BRANCH: .*|MAIN_BRANCH: $main_branch|g" "$temp_file"
+        rm -f "${temp_file}.bak"
+    fi
+    
+    # MERGE_TEMPLATE -> MERGE_TEMPLATE
+    local merge_template=$(parse_yaml_value "$config_file" "MERGE_TEMPLATE")
+    if [[ -n "$merge_template" ]]; then
+        # Remove existing quotes if present
+        merge_template=$(echo "$merge_template" | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")
+        # Escape special characters for sed
+        merge_template=$(echo "$merge_template" | sed 's/[&/\]/\\&/g')
+        sed -i.bak "s|MERGE_TEMPLATE: .*|MERGE_TEMPLATE: \"$merge_template\"|g" "$temp_file"
+        rm -f "${temp_file}.bak"
+    fi
+    
+    # CONTEXTUAL_ROOT -> default value (not in config.yaml, but derived from contextual target)
+    # This will be handled separately in the install process
+    
+    # ANALYZE_EXCLUDE_PATTERNS and ANALYZE_INCLUDE_PATTERNS are complex arrays
+    # We'll handle them by replacing the entire array section in the frontmatter
+    # For now, keep the default values from the command files
+    
+    # Move temp file to original
+    mv "$temp_file" "$cmd_file"
+}
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -213,20 +331,6 @@ copy_contextual_files() {
         print_success "Context files copied"
     fi
     
-    # Copy scripts directory (overwrite)
-    if [[ -d "$CONTEXTUAL_ROOT/scripts" ]]; then
-        print_info "Copying scripts directory (overwriting existing)..."
-        cp -r "$CONTEXTUAL_ROOT/scripts" "$target_dir/"
-        print_success "Scripts directory copied"
-    fi
-    
-    # Copy templates directory (overwrite)
-    if [[ -d "$CONTEXTUAL_ROOT/templates" ]]; then
-        print_info "Copying templates directory (overwriting existing)..."
-        cp -r "$CONTEXTUAL_ROOT/templates" "$target_dir/"
-        print_success "Templates directory copied"
-    fi
-    
     # Copy README.md if it exists
     if [[ -f "$CONTEXTUAL_ROOT/README.md" ]]; then
         print_info "Copying README.md..."
@@ -234,37 +338,91 @@ copy_contextual_files() {
         print_success "README.md copied"
     fi
     
-    # Copy config if it exists
-    if [[ -f "$CONTEXTUAL_ROOT/config" ]]; then
-        print_info "Copying config..."
-        cp "$CONTEXTUAL_ROOT/config" "$target_dir/"
-        print_success "config copied"
+    # Copy config.yaml
+    if [[ -f "$CONTEXTUAL_ROOT/config.yaml" ]]; then
+        print_info "Copying config.yaml..."
+        cp "$CONTEXTUAL_ROOT/config.yaml" "$target_dir/"
+        print_success "config.yaml copied"
+    else
+        print_warning "config.yaml not found in $CONTEXTUAL_ROOT"
     fi
 }
 
-# Function to copy agent command files
-copy_agent_commands() {
+# Function to install commands and create symlinks
+install_agent_commands() {
     local project_dir="$1"
     local agent="$2"
+    local contextual_target="$3"
+    
+    local contextual_commands_dir="$project_dir/$contextual_target/commands"
+    local config_file="$project_dir/$contextual_target/config.yaml"
+    
+    # Create .contextual/commands directory
+    mkdir -p "$contextual_commands_dir"
+    
+    # Copy command files to .contextual/commands
+    print_info "Installing command files to $contextual_commands_dir..."
+    if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
+        cp "$COMMANDS_SOURCE"/*.md "$contextual_commands_dir/"
+        print_success "Command files installed"
+    else
+        print_warning "No command files found in $COMMANDS_SOURCE"
+        return 1
+    fi
+    
+    # Replace config variables in command files
+    print_info "Updating command files with project configuration..."
+    if [[ -f "$config_file" ]]; then
+        for cmd_file in "$contextual_commands_dir"/*.md; do
+            if [[ -f "$cmd_file" ]]; then
+                replace_config_variables "$cmd_file" "$config_file"
+            fi
+        done
+        
+        # Update CONTEXTUAL_ROOT in contextualize.md
+        if [[ -f "$contextual_commands_dir/contextualize.md" ]]; then
+            local contextual_root="$contextual_target/context"
+            sed -i.bak "s|CONTEXTUAL_ROOT: .*|CONTEXTUAL_ROOT: $contextual_root|g" "$contextual_commands_dir/contextualize.md"
+            rm -f "$contextual_commands_dir/contextualize.md.bak"
+        fi
+        
+        print_success "Configuration variables updated"
+    else
+        print_warning "config.yaml not found, using default values in commands"
+    fi
     
     # Get agent-specific folder from configuration
     local agent_folder="$(get_agent_folder "$agent")"
     
     if [[ -z "$agent_folder" ]]; then
-        print_warning "Unknown agent: $agent. Skipping command copy."
+        print_warning "Unknown agent: $agent. Commands installed but no symlinks created."
         return 1
     fi
     
-    local commands_dir="$project_dir/$agent_folder"
+    local agent_commands_dir="$project_dir/$agent_folder"
     
-    if [[ -d "$commands_dir" ]]; then
-        print_info "Copying $agent command files from $COMMANDS_SOURCE..."
-        if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
-            cp "$COMMANDS_SOURCE"/*.md "$commands_dir/" 2>/dev/null || true
-            print_success "$agent command files copied"
-        else
-            print_warning "No command files found in $COMMANDS_SOURCE"
-        fi
+    # Create symlinks from agent folder to .contextual/commands
+    print_info "Creating symlinks in $agent_folder..."
+    if [[ -d "$agent_commands_dir" ]]; then
+        for cmd_file in "$contextual_commands_dir"/*.md; do
+            if [[ -f "$cmd_file" ]]; then
+                local cmd_name="$(basename "$cmd_file")"
+                local symlink_path="$agent_commands_dir/$cmd_name"
+                local relative_target="../../$contextual_target/commands/$cmd_name"
+                
+                # Remove existing file or symlink if it exists
+                if [[ -e "$symlink_path" ]] || [[ -L "$symlink_path" ]]; then
+                    rm -f "$symlink_path"
+                fi
+                
+                # Create symlink
+                ln -s "$relative_target" "$symlink_path"
+            fi
+        done
+        print_success "Symlinks created for $agent"
+    else
+        print_error "Agent commands directory not found: $agent_commands_dir"
+        return 1
     fi
 }
 
@@ -285,13 +443,24 @@ validate_installation() {
     fi
     
     # Check for required subdirectories
-    local required_dirs=("context" "scripts" "templates")
+    local required_dirs=("context" "commands")
     for dir in "${required_dirs[@]}"; do
         if [[ ! -d "$target_dir/$dir" ]]; then
             print_error "Required directory missing: $target_dir/$dir"
             return 1
         fi
     done
+    
+    # Check for config file
+    if [[ ! -f "$target_dir/config.yaml" ]]; then
+        print_warning "config.yaml not found"
+    fi
+    
+    # Check for command files
+    if [[ ! -d "$target_dir/commands" ]] || ! ls "$target_dir/commands"/*.md 1> /dev/null 2>&1; then
+        print_error "No command files found in $target_dir/commands"
+        return 1
+    fi
     
     # Check agent-specific structure
     local agent_folder="$(get_agent_folder "$agent")"
@@ -326,8 +495,8 @@ install_contextual() {
     # Copy contextual files
     copy_contextual_files "$project_dir" "$contextual_target"
     
-    # Copy agent-specific command files
-    copy_agent_commands "$project_dir" "$agent"
+    # Install commands and create symlinks
+    install_agent_commands "$project_dir" "$agent" "$contextual_target"
     
     # Validate installation
     if validate_installation "$project_dir" "$contextual_target" "$agent"; then
@@ -343,7 +512,7 @@ install_contextual() {
         
         print_info ""
         print_info "Configuration:"
-        print_info "  Config file: $project_dir/$contextual_target/config"
+        print_info "  Config file: $project_dir/$contextual_target/config.yaml"
         print_info "  Edit the config file to customize settings"
     else
         print_error "Installation validation failed. Please check the output above."

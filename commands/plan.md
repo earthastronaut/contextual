@@ -1,5 +1,23 @@
+---
+config:
+  SPECIFY_DIR: ./specs
+---
 # Goal
-Update the ${FEATURE_CONTEXT} file to move all tasks into a linked file `${FEATURE_DIR}/plan.md` which is a detailed implementation plan with tasks for the feature and remove any tasks from the ${FEATURE_CONTEXT} file.
+
+Create a detailed implementation plan from the feature specification and organize tasks into `plan.md`.
+
+**CRITICAL CONSTRAINT: ONLY MODIFY FILES IN `${SPECIFY_DIR}/${CURRENT_BRANCH}/`**
+
+This command creates **PLANNING DOCUMENTATION**, DO NOT MODIFY SOURCE CODE!
+
+**ALLOWED MODIFICATIONS:**
+- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
+- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/plan.md` (primary target)
+- ✅ Any files within `${SPECIFY_DIR}/${CURRENT_BRANCH}/` directory
+
+**FORBIDDEN (NEVER TOUCH):**
+- ❌ `commands/*.md`, `README.md`, source code, config files
+- ❌ ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
 
 # User Input
 
@@ -7,60 +25,99 @@ Update the ${FEATURE_CONTEXT} file to move all tasks into a linked file `${FEATU
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty).
-
 # Steps
 
-## 1. Prerequisites
-Execute: `.contextual/scripts/bash/plan.sh`
-This will output:
-- ${SPECIFY_DIR}: The specify directory path
-- ${FEATURE_CONTEXT}: The context file path
+## 1. Find Specification
 
-## 2. Analyze Context File
+1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
+2. Verify not on `main` - if on main, STOP and tell user to switch
+3. Set `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
+4. Set `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
+5. If context doesn't exist → tell user to run `/specify` first
+
+## 2. Analyze Context
+
 - Extract requirements, specs, and acceptance criteria from ${FEATURE_CONTEXT}
 - Identify key components and features to implement
 
 ## 3. Examine Existing Code
-- If `${FEATURE_DIR}/analyzed.md` exists then look at that analysis first. Otherwise do a deep research look on the project.
-- Scan for existing code and configurations. Do not examine ${SPECIFY_DIR} directories.
-- Identify what's already implemented vs. missing
 
-## 4. Generate Concise Plan
-- Create focused task breakdown (max 10 tasks) using `- [ ]` syntax and prioritize less tasks if possible
-- Organize tasks into logical phases (e.g., "Phase 1: Foundation", "Phase 2: Core Features")
-- Use `- [ ]` syntax for all tasks (markdown checkbox format)
+- If `${FEATURE_DIR}/analyzed.md` exists, review that analysis first
+- Otherwise, scan project for existing code and configurations
+- Don't examine ${SPECIFY_DIR} directories
+- Identify what's implemented vs. missing
+
+## 4. Generate Plan
+
+- Create focused task breakdown (max 10 tasks, fewer is better)
+- Organize into logical phases (e.g., "Phase 1: Foundation")
+- Use `- [ ]` syntax for all tasks
 - Prioritize by dependency and importance
 - Include only essential technical decisions
 
-## 5. Create Plan Output
-- Generate `${FEATURE_DIR}/plan.md` file
-- Keep implementation steps concise and actionable
-- Focus on critical decisions and next steps
+## 5. Create Plan File
 
-## 6. Merge Back to Context
-- Add plan summary to ${FEATURE_CONTEXT} file
+Generate `${FEATURE_DIR}/plan.md` with:
+- Concise, actionable implementation steps
+- Critical decisions and next steps
+- Phase-organized tasks
+
+## 6. Update Context
+
+- Add plan summary to ${FEATURE_CONTEXT}
+- Link to plan.md
 - Preserve existing content and structure
 
+## 7. Validate Changes
+
+Before completing:
+1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+2. Verify plan.md has clear, actionable tasks
+3. Check no source code or command files were touched
+
 # Output
-- `${FEATURE_DIR}/plan.md` file with detailed implementation plan
-- Updated ${FEATURE_CONTEXT} with link to the plan
-- Focused task breakdown (max 10 tasks) using `- [ ]` syntax and prioritize less tasks if possible
-- Tasks organized into logical phases for better execution flow
-- Prioritized by dependency and importance
-- Essential technical decisions included
+
+Summary:
+- Created: `${FEATURE_DIR}/plan.md`
+- Updated: `${FEATURE_CONTEXT}` with plan link
+- Task count and phase organization
+- Key technical decisions
+
+# ⚠️ FINAL CHECKPOINT ⚠️
+
+**Before you finish, verify:**
+- [ ] Modified ONLY `${SPECIFY_DIR}/${CURRENT_BRANCH}/` files
+- [ ] Did NOT touch command/source/config files
+- [ ] Created plan documentation, NOT implementation
+
+**If you modified ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`, you did it WRONG.**
 
 # Next Steps
+
 After running this command:
-1. Review the generated `${FEATURE_DIR}/plan.md` file for completeness
+1. Review `${FEATURE_DIR}/plan.md` for completeness
 2. Use `/clarify` to resolve any remaining ambiguities
-3. Use `/implement` to begin executing the implementation plan
-4. Update the plan as needed during implementation
+3. Use `/implement` to begin executing the plan
+4. Update plan as needed during implementation
 
 # Guidelines
-- **Separation of concerns**: Keep context file focused on requirements, reference detailed plan rather than duplicating it
-- **Task tracking**: Use `- [ ]` syntax for all tasks to enable easy progress tracking
-- **Logical organization**: Organize tasks into phases for clear execution flow and better project management
-- **Readability**: Maintain brief, scannable format with concise, actionable steps
-- **Scope boundaries**: Follow all links and files to understand domain context, but only modify files within ${SPECIFY_DIR} directory
-- **Specification focus**: Create specifications only, do not implement the feature
+
+**Plan Best Practices:**
+- Use `- [ ]` checkbox syntax for all tasks
+- Organize into logical phases
+- Keep focused (max 10 tasks, fewer is better)
+- Prioritize by dependency and importance
+- Include only essential technical decisions
+- Maintain brief, scannable format
+
+**File Modification Rules:**
+- ✅ ONLY modify files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+- ❌ NEVER touch source code, commands, configs
+- This command creates plan documentation, NOT implementation
+- When in doubt, you're probably modifying the wrong file
+
+**Scope Boundaries:**
+- Scan existing code to understand what's implemented
+- Follow links and files for domain context
+- But ONLY modify files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+- Create specifications only, don't implement the feature

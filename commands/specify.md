@@ -1,5 +1,26 @@
+---
+config:
+  SPECIFY_DIR: ./specs
+---
 # Goal
-Create a new feature context.md file in the spec-driven development flow based on user input. DO NOT MODIFY source code - only files within ${SPECS_DIR} directory. DO NOT IMPLEMENT THE FEATURE - ONLY CREATE THE SPECIFICATION.
+
+Create a feature specification document based on user input.
+
+**CRITICAL CONSTRAINT: ONLY MODIFY FILES IN `${SPECIFY_DIR}/${CURRENT_BRANCH}/`**
+
+This command creates **DOCUMENTATION**, DO NOT MODIFY SOURCE CODE!
+
+**If user says:** "implement X" or "change Y" or "update Z"  
+**They mean:** Create a specification for this requirement  
+**NOT:** Make the actual code changes
+
+**ALLOWED MODIFICATIONS:**
+- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md` (primary target)
+- ✅ Any files within `${SPECIFY_DIR}/${CURRENT_BRANCH}/` directory
+
+**FORBIDDEN (NEVER TOUCH):**
+- ❌ `commands/*.md`, `README.md`, source code, config files
+- ❌ ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
 
 # User Input
 
@@ -7,53 +28,111 @@ Create a new feature context.md file in the spec-driven development flow based o
 ${ARGUMENTS}
 ```
 
-You MUST consider the user input before proceeding (if not empty). Do not implement the feature - just create the specification. Ignore action words like update, implement, modify, etc. - focus on WHAT needs to be specified.
+**How to interpret user input:**
+- Focus on **WHAT** needs to be specified, not **HOW** to implement
+- "implement X" → create specification for X
+- "change Y" → add Y to requirements
+- "fix Z" → document Z as needing attention
 
 # Steps
 
-## 1. Validate & Generate Feature Name
-Analyze the user input to ensure it contains sufficient detail. From the input, generate a concise (less than 30 characters) sanitized kebab-case name and store in ${FEATURE_INPUT}.
+## 1. Check Current Branch
 
-## 2. Create Structure
-Execute: `.contextual/scripts/bash/specify.sh "${FEATURE_INPUT}"`
-This outputs:
-- ${CONTEXT_ROOT}: Root context file
-- ${FEATURE}: Sanitized feature name
-- ${FEATURE_BRANCH}: Created branch name
-- ${FEATURE_DIR}: Feature directory path
-- ${FEATURE_CONTEXT}: Context file path
+1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
+2. Verify not on `main` - if on main, STOP and suggest new branch name
+3. Set `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
+4. Set `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
 
-## 3. Gather Context (Conditional)
-Read ${FEATURE_CONTEXT} to understand the required specification structure.
+## 2. Create Specification Directory
 
-IF user input lacks technical detail or context:
-- Read ${CONTEXT_ROOT} to understand project context
-- Review linked files relevant to the feature
-- Use this information to enrich the specification
+Run: `mkdir -p ${FEATURE_DIR}`
 
-## 4. Write Specification
-Update ${FEATURE_CONTEXT} following it's structure.
+## 3. Generate Context File
 
-Add [NEEDS CLARIFICATION: question?] markers for any ambiguous areas. Don't make up answers - ask questions.
+Create `${FEATURE_CONTEXT}` with this structure:
+
+```markdown
+# Overview
+What problem does this solve and what is the proposed solution? (2-3 sentences)
+
+# Scope
+- **Changes**: Specific files/components to modify
+- **Requirements**: Concrete deliverables (be specific and measurable)
+- **Boundaries**: What explicitly will not change
+- **Dependencies**: New packages or integrations if any
+
+# Solution
+- **Approach**: Key architectural decisions or design patterns
+- **Challenges**: Known constraints or technical considerations
+- **Validation**: How to verify it works correctly
+- **References**: Links to plans or external resources if needed
+
+# Tasks
+
+## Phase 1: Description
+- [ ] task 1
+- [ ] task 2
+```
+
+## 4. Populate with User Request
+
+1. Analyze user request (${ARGUMENTS}) to understand **WHAT** needs to be done
+2. Scan project for relevant context and patterns as needed
+3. Do external research if needed to understand the request
+4. Populate ${FEATURE_CONTEXT} with clear, actionable information
+5. Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas
+6. Use `- [ ]` for incomplete tasks
+
+## 5. Validate Changes
+
+Before completing:
+1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+2. Verify ${FEATURE_CONTEXT} has clear, actionable information
+3. Check no source code or command files were touched
 
 # Output
-- Created feature branch: ${FEATURE_BRANCH}
-- Created feature directory: ${FEATURE_DIR}
-- Created context file: ${FEATURE_CONTEXT}
-- Updated context with specification details
+
+Summary:
+- Branch: `${CURRENT_BRANCH}`
+- Created: `${FEATURE_CONTEXT}`
+- Content overview with key sections
+
+# ⚠️ FINAL CHECKPOINT ⚠️
+
+**Before you finish, verify:**
+- [ ] Created ONLY files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+- [ ] Did NOT touch command/source/config files
+- [ ] Created specification, NOT implementation
+
+**If you modified ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`, you did it WRONG.**
 
 # Next Steps
+
 After running this command:
-1. (optional) Use `/analyze` to do deeper analysis
-2. (optional) Use `/clarify` to resolve markers
-3. (optional) Use `/plan` for implementation details
-4. Use `/implement` to implement tasks from the spec
-5. Use `/commit` to commit the changes
-6. Use `/merge` to merge the changes into the main branch
+1. Review `${FEATURE_CONTEXT}` for completeness
+2. Use `/clarify [info]` to refine the specification
+3. Use `/plan` to create detailed implementation plan
+4. Use `/analyze [folder] [depth]` to analyze project structure
+5. Use `/implement` to execute tasks
+6. Use `/commit` then `/merge` when complete
 
 # Guidelines
-- Keep each section distinct with no duplicate information across sections, cross-reference where needed
-- Be specific and measurable in requirements and acceptance criteria
-- Make tasks actionable implementation steps, not requirement restatements
-- Focus on key information - be concise and to the point
 
+**Specification Best Practices:**
+- Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas
+- Use `- [ ]` checkbox syntax for tasks
+- Focus on **WHAT** needs to be specified, not **HOW**
+- Keep sections distinct with no duplication
+- Make requirements concrete and measurable
+- Document acceptance criteria clearly
+
+**File Modification Rules:**
+- ✅ ONLY create files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+- ❌ NEVER touch source code, commands, configs
+- This command documents requirements, does NOT implement them
+- When in doubt, you're probably trying to modify the wrong file
+
+**User Input Interpretation:**
+- "Implement X" means "create specification for X"
+- "Change Y" means "specify requirement for Y"
+- "Fix Z" means "document Z needs fixing in spec"
