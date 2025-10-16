@@ -21,50 +21,48 @@ ${ARGUMENTS}
 
 ## 1. Check Prerequisites
 
-1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
-2. Set `${MAIN_BRANCH}` = `main` (from config)
-3. Verify NOT on ${MAIN_BRANCH} - if on main, STOP with error
-4. Check for uncommitted changes: `git diff-index --quiet HEAD --`
-   - If uncommitted changes exist → STOP, tell user to commit first
-5. Check for untracked files: `git ls-files --others --exclude-standard`
-   - If untracked files exist → WARN user but continue
+1. Set `${MAIN_BRANCH}` = `main` (from config)
+2. Execute prerequisites
 
-## 2. Analyze Feature & Generate Commit Message
+   - `git branch --show-current` => ${FEATURE_BRANCH}
+   - `git diff-index --quiet HEAD -- ; echo $?` => ${UNCOMMITTED_CHANGES}
+   - `git ls-files --others --exclude-standard` => ${UNTRACKED_FILES}
+   - `git diff --name-only ${MAIN_BRANCH}...${FEATURE_BRANCH}` => ${CHANGED_FILES}
+   - `git log ${MAIN_BRANCH}..${FEATURE_BRANCH} --oneline` => ${COMMIT_LOG}
+   - `git rev-list ${FEATURE_BRANCH}..${MAIN_BRANCH} --count` => ${MAIN_AHEAD_COUNT}
 
-1. Get changed files: `git diff --name-only ${MAIN_BRANCH}...${CURRENT_BRANCH}`
-2. Look for any `context.md` files in the changes
-3. If `context.md` files found → read them as ${FEATURE_CONTEXT}
-4. Review git log: `git log ${MAIN_BRANCH}..${CURRENT_BRANCH} --oneline`
-5. Consider user input and ${FEATURE_CONTEXT} to generate:
-   - `${DESCRIPTION}` (2-3 sentences describing the feature)
-6. Set `${COMMIT_MESSAGE}` using ${MERGE_TEMPLATE}:
-   - Replace `{FEATURE_BRANCH}` with ${CURRENT_BRANCH}
-   - Replace `{DESCRIPTION}` with ${DESCRIPTION}
-   - Replace `{FEATURE_CONTEXT}` with path to context.md file(s)
+3. ${FEATURE_BRANCH} == ${MAIN_BRANCH} → STOP, tell user to switch to a feature branch first
+4. If ${MAIN_AHEAD_COUNT} > 0 → STOP, tell user that ${MAIN_BRANCH} has new commits and to rebase or merge ${MAIN_BRANCH} into ${FEATURE_BRANCH} first
+5. If ${UNCOMMITTED_CHANGES} != 0 → STOP, tell user to commit first
+6. If ${UNTRACKED_FILES} is not empty → WARN user but continue
+7. If ${CHANGED_FILES} is empty → STOP, tell user to add some changes first
 
-## 3. Execute Merge
+## 2. Analyze & Generate Message
 
-1. Checkout main: `git checkout ${MAIN_BRANCH}`
-   - If fails → STOP with error
-2. Squash merge: `git merge --squash ${CURRENT_BRANCH}`
-   - If conflicts → STOP, tell user to resolve manually
-3. Commit: `git commit -m "${COMMIT_MESSAGE}"`
-   - If fails → STOP with error
-4. Report success
+1. Review the `${COMMIT_LOG}`, context.md files, and user input to generate a `${DESCRIPTION}`.
+2. Set `${COMMIT_MESSAGE}` using ${MERGE_TEMPLATE}. Replace with these variables
+   - `{FEATURE_BRANCH}` with `${FEATURE_BRANCH}`
+   - `{DESCRIPTION}` with `${DESCRIPTION}`
+   - `{FEATURE_CONTEXT}` with path to context.md file(s)
+
+## 3. Squash Merge
+
+1. `git checkout ${MAIN_BRANCH}` → STOP if error
+2. `git merge --squash ${FEATURE_BRANCH}` → STOP if error, resolve manually by user
+3. `git commit -m "${COMMIT_MESSAGE}"`
 
 # Output
 
-Summary:
-- Successful merge to ${MAIN_BRANCH} branch
-- Squashed commit with generated message
-- Feature branch remains for manual cleanup
+- Brief summary of the merge
 
 # Next Steps
 
 After running this command:
+
 1. Review the merge results
 2. Verify the commit message is appropriate
 3. Clean up feature branch if desired (manual cleanup)
+4. push to remote if desired
 
 # Guidelines
 
