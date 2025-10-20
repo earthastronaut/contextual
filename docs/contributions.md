@@ -43,9 +43,29 @@ chmod +x contextual
    ./contextual install --project-root .
    ```
 
-4. **Run tests** to ensure everything works:
+4. **Set up shell completion** (optional but recommended):
    ```bash
-   ./contextual run-tests
+   # Auto-detect shell and install completion
+   ./contextual autocomplete
+   
+   # Or specify your shell
+   ./contextual autocomplete bash  # for bash
+   ./contextual autocomplete zsh   # for zsh
+   
+   # Restart your shell or source the rc file
+   source ~/.bashrc  # for bash
+   source ~/.zshrc   # for zsh
+   ```
+
+5. **Link commands** for local development (optional):
+   ```bash
+   # Symlink commands from ./commands/* and ./tests/commands/* to .cursor/commands/
+   ./contextual dev update-links
+   ```
+
+6. **Run tests** to ensure everything works:
+   ```bash
+   ./contextual dev test
    ```
 
 ## 🏗️ Project Structure
@@ -61,13 +81,17 @@ contextual/
 │   └── ...                   # Other workflow commands
 ├── scripts/                   # Core functionality scripts
 │   ├── install.sh            # Project installation script
-│   └── run-tests.sh          # Test runner
+│   ├── autocomplete.sh       # Shell completion setup
+│   └── dev/                  # Development utilities
+│       ├── cli.sh            # Dev command router
+│       └── update-links.sh   # Command symlink updater
 ├── specs/                     # Feature specifications
 │   ├── 0001-install-script/
 │   ├── 0002-contextual-cli-entrypoint/
 │   └── 0003-merge-command/
 ├── tests/                     # Test suite
 │   ├── README.md             # Test documentation
+│   ├── commands/             # Test commands (can be symlinked)
 │   ├── integration/          # Integration tests
 │   └── utils/                # Test utilities
 ├── docs/                      # Additional documentation
@@ -105,6 +129,55 @@ Use `/commit` command to commit the changes. This will commit the changes to the
 ### 7. Merge the Changes
 Use `/merge` command to squash merge the changes into the main branch (configurable by $CONTEXTUAL_MAIN_BRANCH). This will merge the changes into the main branch with a generated commit message.
 
+## 🛠️ Development Utilities
+
+Contextual includes development utilities to improve the local development experience:
+
+### Shell Completion
+
+Enable tab-completion for all contextual commands:
+
+```bash
+# Show help
+./contextual autocomplete help
+
+# Auto-detect shell and install
+./contextual autocomplete
+
+# Install for specific shell
+./contextual autocomplete bash
+./contextual autocomplete zsh
+
+# Restart shell or source rc file
+source ~/.bashrc   # bash
+source ~/.zshrc    # zsh
+```
+
+After installation, you'll have tab-completion for:
+- Main commands: `install`, `update`, `dev`, `autocomplete`, `help`, `version`
+- Dev subcommands: `test`, `update-links`, `help`
+- Command options and arguments
+
+### Command Development & Testing
+
+Link commands to `.cursor/commands/` for local development and testing:
+
+```bash
+# Show dev utilities help
+./contextual dev help
+
+# Link commands from ./commands/* and ./tests/commands/ to .cursor/commands/
+./contextual dev update-links
+```
+
+This creates symlinks for all markdown files in both `./commands/` and `./tests/commands/`, making them available in Cursor AI IDE for local development and testing.
+
+**Benefits:**
+- Work with both main commands and test commands in Cursor AI IDE
+- Quick iteration on command development
+- Test custom commands without modifying the installation
+- Easy cleanup (just delete the symlinks)
+
 ## 🧪 Testing
 
 The project includes a comprehensive test suite:
@@ -113,19 +186,19 @@ The project includes a comprehensive test suite:
 
 ```bash
 # Run all tests
-./contextual run-tests
+./contextual dev test
 
 # Run specific test
-./contextual run-tests install-test
+./contextual dev test install-test
 
 # List available tests
-./contextual run-tests --list
+./contextual dev test --list
 
 # Run tests with verbose output
-./contextual run-tests --verbose
+./contextual dev test --verbose
 
 # Clean up test artifacts
-./contextual run-tests --cleanup
+./contextual dev test --cleanup
 ```
 
 ### Test Coverage
@@ -156,12 +229,25 @@ This project uses an AI-driven, spec-driven development workflow:
 3. (Optional) Analyze project structure using `/analyze`
 4. (Optional) Plan implementation using `/plan`
 5. Implement the feature using `/implement`
-6. Test your changes with `./contextual run-tests`
+6. Test your changes with `./contextual dev test`
 7. Commit changes using `/commit`
 8. Merge changes using `/merge`
 9. Submit a pull request
 
 **Note**: All commands are AI-driven markdown prompts. The AI interprets them and performs the necessary actions without requiring bash scripts.
+
+### Available Commands
+
+The contextual CLI provides several commands to help with development:
+
+- `./contextual install [PROJECT_ROOT]` - Install contextual tools into a project
+- `./contextual update [PROJECT_ROOT]` - Update contextual tools in a project
+- `./contextual dev <subcommand>` - Development utilities (includes test, update-links)
+- `./contextual dev test [options]` - Run test suite
+- `./contextual dev update-links` - Symlink commands for local development
+- `./contextual autocomplete [shell]` - Install shell completion
+- `./contextual help` - Show help message
+- `./contextual version` - Show version information
 
 ### Best Practices
 
@@ -200,10 +286,10 @@ ls -la /path/to/your/project
 **Test Failures**
 ```bash
 # Run tests with verbose output for debugging
-./contextual run-tests --verbose
+./contextual dev test --verbose
 
 # Clean up test artifacts
-./contextual run-tests --cleanup
+./contextual dev test --cleanup
 ```
 
 ### Getting Help

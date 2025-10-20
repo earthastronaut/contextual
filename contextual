@@ -39,15 +39,14 @@ USAGE:
 COMMANDS:
     install       Install contextual development tools into a project
     update        Update contextual development tools in a project
-    test          Run all tests for contextual development tools
+    dev           Development utilities (run 'contextual dev help' for details)
+    autocomplete  Install shell completion (bash/zsh)
     help          Show this help message
     version       Show version information
 
 EXAMPLES:
     contextual install /path/to/project
     contextual install /path/to/project --agent cursor
-    contextual test --verbose
-    contextual test --list
     contextual help
     contextual version
 
@@ -100,7 +99,8 @@ show_usage() {
     echo ""
     echo "Commands:"
     echo "  install       Install contextual development tools into a project"
-    echo "  test          Run all tests for contextual development tools"
+    echo "  dev           Development utilities (run 'contextual dev help' for details)"
+    echo "  autocomplete  Install shell completion (bash/zsh)"
     echo "  help          Show help message"
     echo "  version       Show version information"
     echo ""
@@ -133,25 +133,29 @@ main() {
         "update")
             execute_script "install.sh" "$@"
             ;;
-        "test")
-            # Run tests from tests directory
-            local test_script="$SCRIPT_DIR/tests/run-tests.sh"
-            if [[ ! -f "$test_script" ]]; then
-                print_error "Test script not found: $test_script"
+        "dev")
+            # Run dev utilities from scripts/dev directory
+            local dev_script="$SCRIPTS_DIR/dev/cli.sh"
+            if [[ ! -f "$dev_script" ]]; then
+                print_error "Dev script not found: $dev_script"
                 exit 1
             fi
-            if [[ ! -x "$test_script" ]]; then
-                print_error "Test script is not executable: $test_script"
+            if [[ ! -x "$dev_script" ]]; then
+                print_error "Dev script is not executable: $dev_script"
                 exit 1
             fi
-            print_info "Executing run-tests.sh with arguments: $*"
-            if "$test_script" "$@"; then
-                print_info "run-tests.sh completed successfully"
+            print_info "Executing dev/cli.sh with arguments: $*"
+            if "$dev_script" "$@"; then
+                print_info "dev/cli.sh completed successfully"
             else
                 local exit_code=$?
-                print_error "run-tests.sh failed with exit code $exit_code"
+                print_error "dev/cli.sh failed with exit code $exit_code"
                 exit $exit_code
             fi
+            ;;
+        "autocomplete")
+            # Run autocomplete script
+            execute_script "autocomplete.sh" "$@"
             ;;
         "help")
             show_help
