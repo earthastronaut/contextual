@@ -163,7 +163,8 @@ NC='\033[0m' # No Color
 
 # Default values
 PROJECT_ROOT=""
-AGENT="$DEFAULT_AGENT"
+AGENTS=("$DEFAULT_AGENT")  # Changed to array for multiagent support
+AGENTS_SPECIFIED=false  # Track if --agent was explicitly specified
 CONTEXTUAL_TARGET="$DEFAULT_CONTEXTUAL_ROOT"
 INCLUDE_COMMANDS=""
 ONLY_COMMANDS=false
@@ -196,7 +197,7 @@ ARGUMENTS:
     PROJECT_ROOT            Target project directory (optional)
 
 OPTIONS:
-    --agent AGENT          AI agent to configure (default: cursor)
+    --agent AGENT          AI agent(s) to configure (default: cursor)
                           Supported agents:
                             - cursor      (Cursor IDE)
                             - claude      (Claude Code)
@@ -211,6 +212,9 @@ OPTIONS:
                             - codebuddy   (CodeBuddy)
                             - roo         (Roo Code IDE)
                             - q           (Amazon Q Developer CLI)
+                          Multiple agents can be specified:
+                            - Comma-separated: --agent cursor,claude
+                            - Multiple flags: --agent cursor --agent claude
     --contextual-root PATH Contextual root directory (default: .contextual)
     --include COMMANDS     Comma-separated list of commands to include
                           Example: --include specify.md,implement.md,commit.md
@@ -221,12 +225,11 @@ OPTIONS:
 EXAMPLES:
     $0 /path/to/project
     $0 /path/to/project --agent cursor
-    $0 /path/to/project --agent claude
+    $0 /path/to/project --agent cursor,claude --only-commands
     $0 /path/to/project --contextual-root .dev-tools
     $0 /path/to/project --include specify.md,implement.md,commit.md
     $0 /path/to/project --only-commands
-    $0 /path/to/project --only-commands --include specify.md,implement.md
-
+    $0 /path/to/project --agent claude --only-commands --include specify.md,implement.md
 EOF
 }
 
@@ -237,20 +240,22 @@ validate_arguments() {
         exit 1
     fi
     
-    # Validate agent
-    local valid_agent=false
-    for supported_agent in $SUPPORTED_AGENTS; do
-        if [[ "$AGENT" == "$supported_agent" ]]; then
-            valid_agent=true
-            break
+    # Validate agents
+    for agent in "${AGENTS[@]}"; do
+        local valid_agent=false
+        for supported_agent in $SUPPORTED_AGENTS; do
+            if [[ "$agent" == "$supported_agent" ]]; then
+                valid_agent=true
+                break
+            fi
+        done
+        
+        if [[ "$valid_agent" == "false" ]]; then
+            print_error "Unsupported agent: $agent"
+            print_error "Supported agents: $SUPPORTED_AGENTS"
+            exit 1
         fi
     done
-    
-    if [[ "$valid_agent" == "false" ]]; then
-        print_error "Unsupported agent: $AGENT"
-        print_error "Supported agents: $SUPPORTED_AGENTS"
-        exit 1
-    fi
     
     # Note: PROJECT_ROOT directory will be created if it doesn't exist
     
@@ -599,13 +604,12 @@ validate_installation() {
 # Main installation function
 install_contextual() {
     local project_dir="$1"
-    local agent="$2"
-    local contextual_target="$3"
-    local include_commands="$4"
+    local contextual_target="$2"
+    local include_commands="$3"
     
     print_info "Starting contextual development tools installation..."
     print_info "Project directory: $project_dir"
-    print_info "Agent: $agent"
+    print_info "Agents: ${AGENTS[*]}"
     
     # Check if only commands mode is enabled
     if [[ "$ONLY_COMMANDS" == true ]]; then
@@ -617,18 +621,30 @@ install_contextual() {
         # Create project directory
         create_project_directory "$project_dir"
         
-        # Install commands directly to agent folder
-        if install_commands_only "$project_dir" "$agent" "$include_commands"; then
-            print_success "Installation completed successfully!"
-            print_info "Commands installed directly to agent folder without .contextual setup."
-            print_info ""
-            
-            local agent_folder="$(get_agent_folder "$agent")"
-            if [[ -n "$agent_folder" ]]; then
-                print_info "$agent commands: $project_dir/$agent_folder"
+        # Install commands directly to agent folders
+        local success_count=0
+        local total_agents=${#AGENTS[@]}
+        
+        for agent in "${AGENTS[@]}"; do
+            print_info "Installing commands for agent: $agent"
+            if install_commands_only "$project_dir" "$agent" "$include_commands"; then
+                success_count=$((success_count + 1))
+                local agent_folder="$(get_agent_folder "$agent")"
+                if [[ -n "$agent_folder" ]]; then
+                    print_success "$agent commands: $project_dir/$agent_folder"
+                fi
+            else
+                print_error "Failed to install commands for agent: $agent"
             fi
+        done
+        
+        if [[ $success_count -eq $total_agents ]]; then
+            print_success "Installation completed successfully for all agents!"
+            print_info "Commands installed directly to agent folders without .contextual setup."
+        elif [[ $success_count -gt 0 ]]; then
+            print_warning "Installation completed with some failures ($success_count/$total_agents agents succeeded)"
         else
-            print_error "Installation failed. Please check the output above."
+            print_error "Installation failed for all agents. Please check the output above."
             exit 1
         fi
     else
@@ -641,33 +657,59 @@ install_contextual() {
         # Create project directory
         create_project_directory "$project_dir"
         
-        # Setup agent-specific structure
-        setup_agent_structure "$project_dir" "$agent"
+        # Setup agent-specific structures for all agents
+        for agent in "${AGENTS[@]}"; do
+            print_info "Setting up structure for agent: $agent"
+            setup_agent_structure "$project_dir" "$agent"
+        done
         
-        # Copy contextual files
+        # Copy contextual files (only once)
         copy_contextual_files "$project_dir" "$contextual_target"
         
-        # Install commands and create symlinks
-        install_agent_commands "$project_dir" "$agent" "$contextual_target" "$include_commands"
+        # Install commands and create symlinks for all agents
+        local success_count=0
+        local total_agents=${#AGENTS[@]}
         
-        # Validate installation
-        if validate_installation "$project_dir" "$contextual_target" "$agent"; then
-            print_success "Installation completed successfully!"
+        for agent in "${AGENTS[@]}"; do
+            print_info "Installing commands for agent: $agent"
+            if install_agent_commands "$project_dir" "$agent" "$contextual_target" "$include_commands"; then
+                success_count=$((success_count + 1))
+            else
+                print_error "Failed to install commands for agent: $agent"
+            fi
+        done
+        
+        # Validate installation for all agents
+        local validation_success=true
+        for agent in "${AGENTS[@]}"; do
+            if ! validate_installation "$project_dir" "$contextual_target" "$agent"; then
+                validation_success=false
+                print_error "Validation failed for agent: $agent"
+            fi
+        done
+        
+        if [[ $success_count -eq $total_agents ]] && [[ "$validation_success" == true ]]; then
+            print_success "Installation completed successfully for all agents!"
             print_info "You can now use contextual development tools in your project."
             print_info ""
             print_info "Contextual directory: $project_dir/$contextual_target"
             
-            local agent_folder="$(get_agent_folder "$agent")"
-            if [[ -n "$agent_folder" ]]; then
-                print_info "$agent commands: $project_dir/$agent_folder"
-            fi
+            print_info "Agent commands:"
+            for agent in "${AGENTS[@]}"; do
+                local agent_folder="$(get_agent_folder "$agent")"
+                if [[ -n "$agent_folder" ]]; then
+                    print_info "  $agent: $project_dir/$agent_folder"
+                fi
+            done
             
             print_info ""
             print_info "Configuration:"
             print_info "  Config file: $project_dir/$contextual_target/config.yaml"
             print_info "  Edit the config file to customize settings"
+        elif [[ $success_count -gt 0 ]]; then
+            print_warning "Installation completed with some failures ($success_count/$total_agents agents succeeded)"
         else
-            print_error "Installation validation failed. Please check the output above."
+            print_error "Installation failed for all agents. Please check the output above."
             exit 1
         fi
     fi
@@ -704,7 +746,27 @@ fi
 while [[ ${#flag_args[@]} -gt 0 ]]; do
     case "${flag_args[0]}" in
         --agent)
-            AGENT="${flag_args[1]}"
+            agent_value="${flag_args[1]}"
+            # Clear default agents only on first --agent flag
+            if [[ "$AGENTS_SPECIFIED" == false ]]; then
+                AGENTS=()
+                AGENTS_SPECIFIED=true
+            fi
+            # Check if comma-separated agents
+            if [[ "$agent_value" == *","* ]]; then
+                # Split by comma and add each agent
+                IFS=',' read -ra AGENT_LIST <<< "$agent_value"
+                for agent in "${AGENT_LIST[@]}"; do
+                    # Trim whitespace
+                    agent=$(echo "$agent" | xargs)
+                    if [[ -n "$agent" ]]; then
+                        AGENTS+=("$agent")
+                    fi
+                done
+            else
+                # Single agent
+                AGENTS+=("$agent_value")
+            fi
             flag_args=("${flag_args[@]:2}")
             ;;
         --contextual-root)
@@ -752,7 +814,7 @@ main() {
     fi
     
     # Run installation
-    install_contextual "$PROJECT_ROOT" "$AGENT" "$CONTEXTUAL_TARGET" "$INCLUDE_COMMANDS"
+    install_contextual "$PROJECT_ROOT" "$CONTEXTUAL_TARGET" "$INCLUDE_COMMANDS"
 }
 
 # Run main function
