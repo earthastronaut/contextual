@@ -4,9 +4,7 @@ config:
 ---
 # Goal
 
-Implement a single task and track it in the feature context.
-
-**Quick one-off task command** - for small tasks that don't need full spec workflow.
+Implement a single task, which doesn't need full spec-driven workflow, and track it in the feature context.
 
 # User Input
 
@@ -21,13 +19,17 @@ ${ARGUMENTS}
 1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
 2. Set `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
 3. Set `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
-4. If context file doesn't exist → create minimal context or warn user
+4. If context doesn't exist → create minimal context or warn user
 
 ## 2. Implement Task
 
-Break down the user input (${ARGUMENTS}) into subtasks and execute them.
+1. **Analyze the task**: Understand what needs to be done based on ${ARGUMENTS}
+2. **Break down into subtasks**: Identify specific steps required to complete the task
+3. **Execute each subtask**: Implement changes systematically, one step at a time
+4. **Validate implementation**: Ensure the task is fully completed and working
+5. **Handle any errors**: Address issues that arise during implementation
 
-## 3. Track Task
+## 3. Track
 
 1. Read ${FEATURE_CONTEXT}
 2. Create "# Additional Tasks" section if it doesn't exist
@@ -36,24 +38,16 @@ Break down the user input (${ARGUMENTS}) into subtasks and execute them.
 
 # Output
 
-Summary:
-- Completed task implementation
-- Updated ${FEATURE_CONTEXT} with completed task marker
+Brief summary of changes implemented..
 
 # Next Steps
 
-After running this command:
-1. Review the implementation results
+1. Review changes in ${FEATURE_CONTEXT}
 2. Use `/commit` to commit the changes
-3. Continue with next tasks
 
 # Guidelines
 
 **Task Execution:**
-- Single task focus: Implement only one task at a time
-- Task tracking: Mark task as complete in ${FEATURE_CONTEXT}
+- Single focus: Implement only one task at a time
+- Task tracking: Mark tasks as complete in ${FEATURE_CONTEXT}
 - Additional tasks: Use "# Additional Tasks" section for ad-hoc tasks
-
-**Prefer /implement:**
-- Use `/implement [task]` instead - same functionality, more flexible
-- This command exists for backward compatibility

@@ -3,23 +3,16 @@ config:
   SPECIFY_DIR: specs
   CONTEXT_ROOT: README.md
   ANALYZE_EXCLUDE_PATTERNS:
-    - cache
-    - __pycache__
-    - node_modules
-    - vendor
-    - dist
-    - build
-    - .pytest_cache
-    - .tox
-    - venv
-    - .venv
-    - .env
-    - .next
-    - .nuxt
-    - .bundle
-    - "*.egg-info"
-    - target
-    - .gradle
+    - .*
+    - **/.*
+    - **/node_modules
+    - **/vendor
+    - **/__pycache__
+    - **/dist
+    - **/build
+    - **/*cache*
+    - **/test
+    - **/mock
   ANALYZE_INCLUDE_PATTERNS: []
 ---
 # Goal
@@ -57,113 +50,89 @@ ${ARGUMENTS}
 - Default depth: `standard`
 
 **Depth levels:**
-- `shallow`: Directory structure and file listing only
-- `standard`: Structure + key files + technologies + dependencies
-- `deep`: Standard + detailed architecture + component relationships + data flow
+- `shallow`: Basic structure and file overview (quick scan)
+- `standard`: Structure + key components + dependencies (recommended)
+- `deep`: Full analysis including architecture and quality metrics (comprehensive)
+
+**Examples:**
+- `analyze` - Standard analysis of current directory
+- `analyze src --depth shallow` - Quick structure scan of src folder
+- `analyze . --depth deep` - Comprehensive analysis of entire project
 
 # Steps
 
-## 1. Determine Paths
+## 1. Setup Analysis Environment
 
 1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
-2. Set `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
-3. Set `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
-4. Set `${ANALYSIS_OUTPUT_DIR}` = `${FEATURE_DIR}/analyzed`
-5. Set `${ANALYSIS_OUTPUT_ROOT}` = `${ANALYSIS_OUTPUT_DIR}/summary.md`
-6. If ${FEATURE_CONTEXT} doesn't exist → STOP, tell user to run `/specify` first
+2. Set paths:
+   - `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
+   - `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
+   - `${ANALYSIS_OUTPUT_DIR}` = `${FEATURE_DIR}/analyzed`
+3. Verify context exists, otherwise STOP and tell user to run `/specify` first
 
-## 2. Parse Analysis Request
+## 2. Parse User Request
 
-From user input, determine:
+Extract from user input:
 - `${ANALYSIS_INPUT_DIRECTORY}` - directory to analyze (default: `.`)
-- `${ANALYSIS_DEPTH}` - analysis depth level (default: `standard`)
+- `${ANALYSIS_DEPTH}` - analysis depth (default: `standard`)
 
-## 3. Read Global Context
+## 3. Gather Project Context
 
-1. Always read `${CONTEXT_ROOT}` exists, read it for project overview
-2. Use this information when creating analysis summary and understanding project purpose
+1. Read `${CONTEXT_ROOT}` for project overview
+2. Use this information in analysis summary
 
-## 4. Apply Exclude Patterns
+## 4. Configure File Filtering
 
-When analyzing directories and files:
-1. Set `${EXCLUDE_PATTERNS}` from config `ANALYZE_EXCLUDE_PATTERNS`
-2. Set `${INCLUDE_PATTERNS}` from config `ANALYZE_INCLUDE_PATTERNS`
-3. Exclude any directory/file matching `${EXCLUDE_PATTERNS}` (case-insensitive)
-4. Always include items matching `${INCLUDE_PATTERNS}` (overrides exclude)
-5. Apply when scanning directories, counting files, and analyzing structure
+Apply filtering rules:
+1. Load `${EXCLUDE_PATTERNS}` from config
+2. Load `${INCLUDE_PATTERNS}` from config  
+3. Exclude files matching exclude patterns (case-insensitive)
+4. Always include files matching include patterns (overrides exclude)
 
 ## 5. Perform Analysis
 
 Create `${ANALYSIS_OUTPUT_DIR}` directory if needed.
 
-### For ALL depth levels (shallow/standard/deep):
+### Phase 1: Basic Structure (All Depths)
 
 **Create `${ANALYSIS_OUTPUT_DIR}/structure.md`:**
 ```markdown
 ---
-# Machine-readable structure metadata
 technology:
   language: ""
-  version: ""
-  runtime: ""
   framework: ""
-  framework_version: ""
   package_manager: ""
-  database: ""
 file_stats:
   total_files: 0
   source_files: 0
   test_files: 0
-  config_files: 0
 organization:
-  pattern: ""  # feature-based, type-based, layered
-  private_folders_prefix: ""  # _, __, .hidden, etc.
-largest_files: []  # [{path, lines, reason}]
+  pattern: ""
+  largest_files: []
 ---
 
 # Project Structure
 
 ## Overview
-[1-2 sentences: How is the codebase organized?]
+[How is the codebase organized?]
 
 ## Technology Stack
-**Runtime**: [Language & version] on [Runtime]
+**Language**: [Language & version]
 **Framework**: [Framework & version]
 **Package Manager**: [npm, pip, cargo, etc.]
-**Database**: [If applicable]
-
-**Key Libraries** (top 5-8 only):
-- **[Category]**: [lib1], [lib2]
 
 ## Directory Structure
-[Tree showing key directories with descriptions]
+[Key directories with descriptions]
 
-## Organization Patterns
-**Approach**: [Feature-based / Type-based / Layered]
-**Naming**: Files: [convention], Dirs: [convention]
-
-## Key Directories
-[List 3-5 most important directories with purpose and key files]
-
-## Configuration
-**Build**: [package.json, Makefile, etc.]
-**Development**: [tsconfig, .env, etc.]
-
-## Entry Points
-**Application**: [main entry file]
-**Development**: [dev command]
-**Tests**: [test command]
-
-**Largest Files** (potential refactor candidates):
-- `[path]` ([#] lines) - [Why large]
+## Key Files
+[Most important files and their purpose]
 ```
 
-### For STANDARD and DEEP only:
+### Phase 2: Components (Standard & Deep)
 
 **Create `${ANALYSIS_OUTPUT_DIR}/components.md`:**
 ```markdown
 ---
-# Machine-readable metadata
 total_components: 0
 components: {
     component_1: {
@@ -189,194 +158,103 @@ last_analyzed: ""
 # Components & Modules
 
 ## Overview
-[2-3 sentences about component organization]
+[Component organization and key modules]
 
-## Component Relationships
-[Textual or simple diagram showing how components relate - can use mermaid or ASCII]
-
-## Recommendations
-[Suggestions for improvements]
+## Relationships
+[How components interact]
 ```
 
 **Create `${ANALYSIS_OUTPUT_DIR}/architecture.md`:**
 ```markdown
 ---
-# Machine-readable architecture metadata
-architectural_style: ""  # monolith, microservices, layered, hexagonal, etc.
-patterns_used: []  # [repository, factory, observer, etc.]
-state_management: ""  # redux, context, signals, etc.
-authentication:
-  method: ""  # oauth, jwt, session
-  provider: ""  # auth0, firebase, custom
+architectural_style: ""
+patterns_used: []
+state_management: ""
 data_storage:
-  type: ""  # sql, nosql, file-system
-  technology: ""  # postgresql, mongodb, sqlite
-  access_pattern: ""  # orm, query-builder, raw-sql
-layers: []  # [{name, location, purpose}]
+  type: ""
+  technology: ""
 ---
 
 # Architecture & Design
 
 ## Architectural Style
-**Type**: [Monolith / Microservices / Layered / etc.]
-**Description**: [2-3 sentences]
-**Rationale**: [Why this was chosen]
+[Monolith / Microservices / Layered / etc.]
 
-## System Architecture
-[Layers and component diagram]
-
-## Key Design Patterns
-[List patterns used, where, purpose, implementation]
+## Key Patterns
+[Design patterns used]
 
 ## Data Flow
-[Describe key flows: request/response, state changes, etc.]
+[Key system flows]
 
 ## State Management
-**Pattern**: [Redux / Context / etc.]
-**Scope**: [Global / Feature / Component]
+[How state is managed]
 
 ## Data Storage
-**Type**: [Database type]
-**Technology**: [Specific DB]
-**Access**: [ORM / Query Builder / etc.]
-
-## Authentication & Authorization
-**Auth Method**: [OAuth / JWT / Session]
-**Provider**: [Auth0 / Firebase / Custom]
-
-## Error Handling
-[Client and server approaches]
-
-## Performance
-**Optimizations**: [Key strategies]
-**Bottlenecks**: [Areas of concern]
-
-## Testing Strategy
-**Unit / Integration / E2E**: [How tested]
-
-## Deployment
-**Infrastructure / CI/CD / Environments**
+[Database and storage approach]
 ```
 
-### For DEEP only:
+### Phase 3: Dependencies (Deep Only)
 
 **Create `${ANALYSIS_OUTPUT_DIR}/dependencies.md`:**
 ```markdown
 ---
-# Machine-readable dependency metadata
 total_dependencies: 0
 production_dependencies: 0
 dev_dependencies: 0
 health: ""  # excellent, good, needs-attention, poor
 security:
   vulnerabilities: 0
-  high: 0
-  medium: 0
-  low: 0
-update_status:
-  up_to_date: 0
-  minor_updates: 0
-  major_updates: 0
-  outdated: 0
-internal:
-  circular_dependencies: 0
-  coupling: ""  # loose, tight, mixed
-critical_dependencies: []  # [{name, version, purpose}]
+critical_dependencies: []
 ---
 
 # Dependencies Analysis
 
 ## Overview
-**Total External Dependencies**: [#]
-**Direct**: [#] | **Dev**: [#]
-**Overall Health**: [Excellent / Good / Needs Attention]
+**Total Dependencies**: [#]
+**Health**: [Excellent / Good / Needs Attention]
 
-## Dependency Summary
-[Nested list for Production and Development dependencies by category]
-
-## Critical Dependencies
-[Top 5-8 dependencies with version, purpose, status, usage]
-
-## External Dependencies by Category
-[Nested list for all dependencies by category]
-
-## Internal Dependencies
-**Module Dependency Graph**: [Map of internal imports in mermaid format]
-**Most Depended-Upon**: [Core modules others depend on]
-**Circular Dependencies**: [✅ None / ⚠️ Found]
-**Coupling**: [Loose / Tight / Mixed]
+## Key Dependencies
+[Most important dependencies]
 
 ## Health Status
-**Update Status**: [Up-to-date / Minor / Major updates needed]
-**Security**: [Vulnerabilities summary]
-**Bundle Size**: [If applicable]
-
-## Risks
-**High-Risk**: [Dependency concerns]
-**Single Points of Failure**: [Critical deps]
-**Maintenance Concerns**: [Unmaintained packages]
+[Update status and security]
 
 ## Recommendations
-[Immediate / Short-term / Long-term improvements]
+[Improvement suggestions]
 ```
 
 **Create `${ANALYSIS_OUTPUT_DIR}/quality.md`:**
 ```markdown
 ---
-# Machine-readable quality metadata
-overall_grade: ""  # A, B, C, D, F
+overall_grade: ""
 metrics:
   lines_of_code: 0
   test_coverage: 0
-  doc_coverage: 0
-  duplication_level: ""  # low, medium, high
-file_sizes:
-  small: 0  # < 100 LOC
-  medium: 0  # 100-500 LOC
-  large: 0  # 500-1000 LOC
-  very_large: 0  # > 1000 LOC
 tools:
-  formatter: ""  # prettier, black, etc.
-  linter: ""  # eslint, pylint, etc.
-  test_framework: ""  # jest, pytest, etc.
-security:
-  vulnerabilities: 0
-  high_severity: 0
-  medium_severity: 0
-  low_severity: 0
-maintainability_score: 0  # 1-10
+  formatter: ""
+  linter: ""
+  test_framework: ""
 ---
 
 # Code Quality Analysis
 
 ## Overall Score
 **Grade**: [A-F]
-**Summary**: [One paragraph assessment]
+**Summary**: [Assessment]
 
-## Testing Coverage
-**Framework**: [Jest / pytest / etc.]
-**Coverage**: [% by module]
-**Critical Untested Areas**: [What needs tests]
+## Testing
+**Framework**: [Test framework]
+**Coverage**: [Coverage percentage]
 
-## Code Consistency
-**Formatter / Linter / Style Guide**: [Status]
-**Naming / Patterns**: [Consistency assessment]
-
-## Error Handling
-**Quality / Consistency / Logging**: [Assessment]
-
-## Security
-**Strengths / Concerns / Checklist**: [Security analysis]
-
-## Maintainability
-[Scores for clarity, coverage, docs, modularity, consistency]
+## Code Quality
+**Tools**: [Formatter, linter status]
+**Consistency**: [Code consistency]
 
 ## Technical Debt
-**High-Impact**: [Major debt items]
-**Quick Wins**: [Easy improvements]
+[Major issues and quick wins]
 
 ## Recommendations
-[Immediate / Short-term / Long-term actions]
+[Improvement suggestions]
 ```
 
 ## 6. Create Analysis Summary
@@ -384,81 +262,61 @@ maintainability_score: 0  # 1-10
 Create `${ANALYSIS_OUTPUT_DIR}/summary.md`:
 ```markdown
 ---
-# Machine-readable analysis metadata
 project:
   name: ""
-  type: ""  # web-app, cli-tool, library, mobile-app, etc.
+  type: ""
   language: ""
   framework: ""
 analysis:
   date: ""
   depth: ""  # shallow, standard, deep
-  analyzer: ""
-  version: ""
 metrics:
   lines_of_code: 0
   total_files: 0
-  test_coverage: 0
-  dependencies: 0
 health:
-  grade: ""  # A, B, C, D, F
-  status: ""  # excellent, good, needs-attention, poor
+  grade: ""
+  status: ""
 ---
 
 # [Project Name] Analysis
 
 ## Executive Summary
-[2-3 paragraph overview: what it does, who it's for, why it exists]
+[What it does, who it's for, why it exists]
 
 **Project Type**: [Web app, CLI tool, library, etc.]
-**Primary Language**: [Language]
-**Framework**: [Framework & version]
-**Grade**: [A-F with brief justification]
-**Last Analyzed**: [Date]
+**Language**: [Language]
+**Framework**: [Framework]
+**Grade**: [A-F]
 **Analysis Depth**: [shallow/standard/deep]
 
-## What This Project Does
-[2-3 sentences explaining the business purpose]
-
-**Primary Use Cases**:
-- [Use case 1]
-- [Use case 2]
-- [Use case 3]
-
-**Target Users**: [Who uses this and why]
-
-## Health Summary
+## Key Findings
 
 **Strengths** ✅
-[Top 3 strengths as bullet points]
+[Top strengths]
 
-**Critical Gaps** ⚠️
-[Top 3 gaps as bullet points]
+**Areas for Improvement** ⚠️
+[Key gaps]
 
-## Detailed Analysis
+## Analysis Files
 
-- [structure.md](./structure.md): Project organization, technology stack, and directory structure
-- [components.md](./components.md): Key modules and component relationships (if created)
-- [architecture.md](./architecture.md): System design, patterns, and data flow (if created)
-- [dependencies.md](./dependencies.md): External and internal dependency analysis (if created)
-- [quality.md](./quality.md): Code quality, testing, and technical debt assessment (if created)
+- [structure.md](./structure.md): Project structure and technology
+- [components.md](./components.md): Key components (if created)
+- [architecture.md](./architecture.md): System design (if created)
+- [dependencies.md](./dependencies.md): Dependencies (if created)
+- [quality.md](./quality.md): Code quality (if created)
 ```
 
 ## 7. Update Context
 
 1. Read `${FEATURE_CONTEXT}`
-2. Add or update "Project Analysis" section with:
-   - Link to `${ANALYSIS_OUTPUT_ROOT}`
-   - Brief note on analysis scope and depth
-3. DO NOT duplicate information from analysis files
+2. Add "Project Analysis" section with link to `${ANALYSIS_OUTPUT_ROOT}`
+3. Include analysis depth and scope
 
 ## 8. Validate Changes
 
-Before completing:
 1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
-2. Verify all analysis files in `${ANALYSIS_OUTPUT_DIR}/`
-3. Check ${FEATURE_CONTEXT} has link to analysis
-4. Ensure no source code or command files were touched
+2. Verify analysis files created
+3. Check context file updated
 
 # Output
 
@@ -488,30 +346,23 @@ After running this command:
 
 # Guidelines
 
-**Global Context:**
-- Always read `${CONTEXT_ROOT}` if it exists for project overview
-- Reference project goals and conventions from `${CONTEXT_ROOT}` in analysis where relevant.
+**Analysis Approach:**
+- Research and document, never modify source code
+- Organize findings into clear, scannable sections
+- Use appropriate depth level for analysis scope
 
-**Research Approach:**
-- Analyze and document, never implement changes to source code
-- Keep context file focused on requirements, reference detailed analysis
-- Include all aspects based on depth level
-- Organize findings into clear sections for easy navigation
-- Use clear, scannable format with headers and lists
-
-**File Modification Rules:**
+**File Rules:**
 - ✅ ONLY edit files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
-- ❌ NEVER touch source code, commands, configs
-- Read any project files needed to understand context
-- But only modify files in `${ANALYSIS_OUTPUT_DIR}/`
-- This command creates research documentation, NOT implementation
+- ❌ NEVER touch source code, commands, or configs
+- Create analysis documentation in `${ANALYSIS_OUTPUT_DIR}/`
 
 **Performance:**
-- Complete analysis in reasonable time (< 5 minutes for deep mode on large projects)
-- Apply `${EXCLUDE_PATTERNS}` to avoid analyzing build artifacts and cache
-- Honor `${INCLUDE_PATTERNS}` to override exclude patterns when needed
+- Complete analysis efficiently (less than 5 minutes for deep mode)
+- Apply exclude patterns to skip build artifacts
+- Use include patterns to override exclusions when needed
 
-**YAML/Metadata Formatting:**
-- Minimize quoted strings in frontmatter and YAML
-- Only quote when necessary (special chars, multiline with `|`, empty strings, ambiguous values)
-- Simple strings, numbers, booleans, and lists should be unquoted
+**Practical Examples:**
+- **Quick overview**: `analyze src --depth shallow` - Fast structure scan
+- **Standard analysis**: `analyze` - Recommended for most projects
+- **Comprehensive**: `analyze . --depth deep` - Full architecture analysis
+- **Specific folder**: `analyze components --depth standard` - Focus on specific area

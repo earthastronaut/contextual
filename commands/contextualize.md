@@ -1,14 +1,17 @@
 ---
 config:
   CONTEXT_ROOT: README.md
+  CONTEXT_DIR: .contextual/context/
+  STRUCTURE:
+    "technology.md": "Concentrate on technical implementation details (specifications, architecture, libraries, APIs, settings)"
+    "product.md": "Emphasize user experience and product strategy aspects (personas, user stories, design, opportunities, constraints)"
+    "domains.md": "Focus on pure business logic elements (definitions, entities, business rules, features)"
 ---
 # Goal
 
-Update contextual information files in `.contextual/context/` directory based on user input.
+You're a leader responsible for providing detailed and concise contextual information for project execution. Link out to relevant project files.
 
-**CONSTRAINT: ONLY MODIFY FILES IN `.contextual/context/`**
-
-This command manages **CONTEXT DOCUMENTATION**, not source code or specifications.
+**CONSTRAINT: ONLY MODIFY FILES IN `${CONTEXT_DIR}`** - This command manages context documentation, not source code.
 
 # User Input
 
@@ -16,79 +19,71 @@ This command manages **CONTEXT DOCUMENTATION**, not source code or specification
 ${ARGUMENTS}
 ```
 
-# Steps
+# Process
 
-## 1. Initialize Context Directory
+## 1. Setup & Discovery
+- **Initialize**: Run `ls -la ${CONTEXT_DIR}` or `mkdir -p ${CONTEXT_DIR}` if missing
+- **Empty input**: Create files based on `${STRUCTURE}` config, add to `${CONTEXT_ROOT}` "Context Files" section, then STOP
+- **Scan changes**: Run `git diff --name-only --cached` and `git diff --name-only` for recent modifications
+- **Read context**: Use `find ${CONTEXT_DIR} -name "*.md" -type f` to get all context files, read each one
+- **Global context**: Read `${CONTEXT_ROOT}` if exists for project-wide conventions
+- **Follow links**: Track `[text](path)` or `[[link]]` references (max depth: 3)
 
-1. Check if `.contextual/context/` directory exists
-2. If not, create it
-3. If user input is empty:
-   - Create `technology.md` (for technical stack and architecture details)
-   - Create `product.md` (for product requirements and specifications)
-   - Create `domains.md` (for business domains and terminology)
-   - Add references to these files in `${CONTEXT_ROOT}` (README.md)
-   - STOP after initialization
+## 2. Parse & Analyze
+**Extract from user input:**
+- Keywords (domain terms, technical concepts, business requirements)
+- Intent (add/update/clarify/remove)
+- Scope (which context files are relevant)
+- Priority (urgent/critical/important indicators)
 
-## 2. Scan Context Directory
+**Patterns:**
+- "Add [concept] to [domain]" → Update specific context file
+- "Update [existing info]" → Modify existing content
+- "Clarify [unclear term]" → Add definition/explanation
+- "Remove [outdated info]" → Delete/update obsolete content
 
-1. Get changed files: `git diff --name-only --cached` and `git diff --name-only`
-2. List all existing `.contextual/context/` files
-3. Follow links to understand domain, technical specifications, and relevant context
-4. If `${CONTEXT_ROOT}` exists, read it for global project context and conventions
+**Gap analysis:**
+- Missing concepts, incomplete relationships, outdated information, ambiguous references
 
-## 3. Parse User Input
+## 3. Clarify & Update
+**Prompt for clarity** using `[NEEDS CLARIFICATION: question?]` format when:
+- Concepts are vague (ask for specific details)
+- Abstract concepts need examples
+- Scope could apply to multiple domains
+- Assumptions about existing context need verification
 
-Extract key information from user's request.
-
-## 4. Identify Gaps
-
-Determine what additional information is needed.
-
-## 5. Prompt User
-
-Add specific `[NEEDS CLARIFICATION: question?]` for anything unclear.
-
-## 6. Update Files
-
-Modify existing context files with new information.
-
-## 7. Create Links
-
-Add necessary cross-references between files.
+**Update context files:**
+- Add new concepts with definitions and relationships
+- Update existing content, maintain consistency
+- Preserve structure, use consistent markdown formatting
+- Include cross-references and timestamps for major updates
+- Create bidirectional links between related concepts
 
 # Output
 
-Summary:
-- Updated `.contextual/context/` files with new information
-- Concise updates to existing context files
-- Clear prompts for missing information marked with `[NEEDS CLARIFICATION: question?]`
-- Structured markdown with consistent formatting
-- Cross-references between related context files
+- Updated `${CONTEXT_DIR}` files with new information
+- Concise updates with `[NEEDS CLARIFICATION: question?]` prompts for missing info
+- Structured markdown with cross-references
 
 # Next Steps
 
-After running this command:
 1. Review updated context files for completeness
-2. Address any `[NEEDS CLARIFICATION: question?]` prompts
-3. Use `/specify` to create new feature specification
-4. Use `/clarify` to resolve ambiguities in existing features
-5. Use `/analyze` to examine project structure if needed
+2. Address clarification prompts
+3. Use `/specify`, `/clarify`, or `/analyze` as needed
 
-# Guidelines
+# Guidelines & Error Handling
 
-**Global Context:**
-- Always read `${CONTEXT_ROOT}` if it exists for project-wide context
-- Use global context to maintain consistency with project conventions
-- Avoid duplicating information that belongs in `${CONTEXT_ROOT}`
-
-**Context Management:**
-- Always update existing files over creating new ones
-- Ask specific questions rather than open-ended ones
-- Maintain single source of truth for each piece of information
-- Use consistent terminology across all files
-- Keep updates focused and actionable
-
-**File Modification Rules:**
-- ✅ ONLY modify files in `.contextual/context/` directory
+**Core Rules:**
+- ✅ ONLY modify files in `${CONTEXT_DIR}` directory
 - ❌ NEVER touch source code, commands, specs, or configs
-- This command manages context documentation only
+- Always update existing files over creating new ones
+- Maintain single source of truth, use consistent terminology
+- Ask specific questions rather than open-ended ones
+
+**Common Issues & Solutions:**
+- **Directory not found**: `mkdir -p ${CONTEXT_DIR}`
+- **Permission denied**: `chmod 755 ${CONTEXT_DIR}`
+- **Git commands failing**: Check `git status`, run `git init` if needed
+- **File conflicts**: Ask user to clarify which information is correct
+- **Corrupted files**: Backup with `cp -r ${CONTEXT_DIR} ${CONTEXT_DIR}.backup/` then recreate
+- **Unclear input**: Ask for specific examples or rephrasing
