@@ -1,1 +1,0 @@
-../../commands/analyze.md

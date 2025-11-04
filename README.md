@@ -24,7 +24,7 @@
 git checkout -b feature/add-user-authentication
 
 # Run these commands
-/specify description of the feature you want to add
+/plan description of the feature you want to add
 /implement
 /commit
 /merge
@@ -35,10 +35,10 @@ git checkout -b feature/add-user-authentication
 ```
 {agent}/commands/      # AI commands linked from .contextual/commands/
 .contextual/          # Configuration and utilities
-|-- commands/         # AI commands (/specify, /implement, etc.)
+|-- commands/         # AI commands (/plan, /implement, etc.)
 |-- config.yaml       # Configuration file
 |-- context/          # Global context storage
-specs/{branch}/       # Feature specifications (auto-created when running /specify)
+specs/{branch}/       # Feature specifications (auto-created when running /plan)
 ```
 
 **Supported AI agents**: cursor, claude, gemini, copilot, windsurf, roo, auggie, q
@@ -70,7 +70,7 @@ For updating just the command files without a `.contextual` directory or configu
 contextual install /path/to/project --only-commands
 
 # Install specific commands only
-contextual install /path/to/project --only-commands --include specify.md,implement.md,commit.md
+contextual install /path/to/project --only-commands --include plan.md,implement.md,commit.md
 
 # Install/update into `.claude/commands/` directory
 contextual install /path/to/project --only-commands --agent claude
@@ -98,30 +98,26 @@ These are the core commands you can use to build the feature.
 
 ```bash
 /contextualize                          # Clarify global context information (optional)
-/specify add user authentication        # Create spec
-/clarify add OAuth support              # Refine spec (optional)
-/plan                                   # Create detailed implementation plan (optional)
+/plan description of feature            # Create/refine spec and implementation plan
 /analyze backend/auth                   # Analyze folder (optional)
-/task description of something to do    # One-off task (optional)
-/implement                              # Build the feature
+/implement                              # Build the feature (can include quick tasks)
 /commit                                 # Commit changes (optional)
 /merge                                  # Squash merge to main (optional)
 ```
 
 ### Quick Tasks
 
-These are for quick one-off tasks which can be added to the feature context file.
+For quick one-off tasks, use `/implement` with a description:
 
 ```bash
-/implement fix typo in login form   # Decides if this is a one-off or spec-driven task
-/task fix typo in login form        # More explicit one-off task
+/implement fix typo in login form   # Handles both spec-driven and one-off tasks
 ```
 
 ## 🎯 How It Works
 
 - **AI-Driven**: Commands are markdown prompts interpreted by AI (no bash scripts)
-- **Spec Commands**: `/specify`, `/clarify`, `/plan` → Update docs in `specs/` only
-- **Implementation**: `/implement` → Makes actual code changes
+- **Spec Commands**: `/plan` → Create/refine specs and implementation plans (updates docs in `specs/` only)
+- **Implementation**: `/implement` → Makes actual code changes (handles both spec-driven and quick tasks)
 - **Git Operations**: `/commit`, `/merge` → Save and integrate work
 
 ## 📚 More Info

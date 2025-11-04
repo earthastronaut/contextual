@@ -1,123 +1,103 @@
 ---
 config:
-  SPECIFY_DIR: specs
+  SPECS_DIR: specs
+  AGENTS_MD: AGENTS.md
 ---
+
 # Goal
 
-Create a detailed implementation plan from the feature specification and organize tasks into `plan.md`.
+Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/updates **DOCUMENTATION ONLY** - never source code.
 
-**CRITICAL CONSTRAINT: ONLY MODIFY FILES IN `${SPECIFY_DIR}/${CURRENT_BRANCH}/`**
+# Instructions
 
-This command creates **PLANNING DOCUMENTATION**, DO NOT MODIFY SOURCE CODE!
+**Note**: As you proceed, replace variables with the actual values. Use the config frontmatter for some of the global variable replacement.Example:
 
-**ALLOWED MODIFICATIONS:**
-- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
-- ✅ `${SPECIFY_DIR}/${CURRENT_BRANCH}/plan.md` (primary target)
-- ✅ Any files within `${SPECIFY_DIR}/${CURRENT_BRANCH}/` directory
+- Input: "Set `${EXAMPLE}` as $(echo "hello world)"
+- Output: Everywhere ${EXAMPLE} is replaced with "hello world" when evaluating.
 
-**FORBIDDEN (NEVER TOUCH):**
-- ❌ `commands/*.md`, `README.md`, source code, config files
-- ❌ ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
+# Routing
 
-# User Input
+1. Get branch: `git branch --show-current` → `${CURRENT_BRANCH}` (stop if `main`)
+2. Set `${FEATURE_DIR}` = `${SPECS_DIR}/${CURRENT_BRANCH}`, `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
+3. Replace all env variables with actual values.
+4. Route if:
+   - No `context.md` exists → **CREATE** mode
+   - `context.md` exists with `[NEEDS CLARIFICATION]` markers → **CLARIFY** mode
+   - `context.md` exists without `[NEEDS CLARIFICATION]` markers → **PLAN** mode
 
-```text
-${ARGUMENTS}
+# Mode: CREATE
+
+**When:** `${FEATURE_CONTEXT}` does not exist
+
+1. Make the directory ${FEATURE_DIR}` if it doesn't exist
+2. Create `${FEATURE_CONTEXT}` from:
+
+```markdown
+# Problem Statement
+
+[What problem does this solve and what is the proposed solution? (2-3 sentences. Keep it concise.)]
+
+# Scope
+
+[List requirements, boundaries, and dependencies. Be specific and measurable. Do not include implementation details. Keep it concise.]
+
+# Solution
+
+[Describe the solution. Include reasoning for why this approach was chosen over alternatives. Keep it concise.]
+
+# Tasks
+
+[Plan and list the implementation tasks by phase. Be specific and measurable. DRY. Reference the solution and scope sections.]
+
+## Phase 1: Description
+
+- [ ] task 1
 ```
 
-# Steps
+3. Read `${AGENTS_MD}` if exists for project context
+4. Populate from user input `${ARGUMENTS}`: analyze request, scan project, research if needed.
+   - Focus on **WHAT** needs to be specified, not **HOW** to implement
+   - "Implement X" means "create specification for X"
+   - "Change Y" means "specify requirement for Y"
+   - "Fix Z" means "document Z needs fixing in spec"
+5. Add `[NEEDS CLARIFICATION: question?]` for ambiguous areas where you need user input.
+6. Validate: only `${SPECS_DIR}/${CURRENT_BRANCH}/` files modified.
 
-## 1. Find Specification
+# Mode: CLARIFY
 
-1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
-2. Verify not on `main` - if on main, STOP and tell user to switch
-3. Set `${FEATURE_DIR}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}`
-4. Set `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
-5. If context doesn't exist → tell user to run `/specify` first
+**When:** `${FEATURE_CONTEXT}` exists with `[NEEDS CLARIFICATION]` markers
 
-## 2. Analyze Context
+1. Read `${FEATURE_CONTEXT}` and related files, identify all `[NEEDS CLARIFICATION]` markers
+2. Read `${AGENTS_MD}` if relevant
+3. **If user input provided:**
+   - Update `${FEATURE_CONTEXT}` sections (Overview, Scope, Solution, Tasks)
+   - Add new `[NEEDS CLARIFICATION]` markers as needed
+   - Remove resolved markers
+4. **If NO user input:**
+   - Present ONE question at a time with options table (A/B/Custom)
+   - Wait for answer, update spec, continue (max 7 per session). Do not ask the same question twice.
+   - If none found → report complete
+5. Validate: only `${SPECS_DIR}/${CURRENT_BRANCH}/` files modified
 
-- Extract requirements, specs, and acceptance criteria from ${FEATURE_CONTEXT}
-- Identify key components and features to implement
+# Mode: PLAN
 
-## 3. Examine Existing Code
+**When:** `${FEATURE_CONTEXT}` exists without `[NEEDS CLARIFICATION]` markers
 
-- If `${FEATURE_DIR}/analyzed.md` exists, review that analysis first
-- Otherwise, scan project for existing code and configurations
-- Don't examine ${SPECIFY_DIR} directories
-- Identify what's implemented vs. missing
+1. Extract requirements/acceptance criteria from `${FEATURE_CONTEXT}`
+2. Review `${FEATURE_DIR}/analyzed.md` if exists, else scan project code
+3. Generate plan: max 10 tasks, organized in phases, use `- [ ]` syntax. DRY. Reference the solution and scope sections. Be concise. Keep requirements concrete and measurable. Prioritize by dependencies.
+4. Update `${FEATURE_CONTEXT}` with plan summary.
+5. Validate: only `${SPECS_DIR}/${CURRENT_BRANCH}/` files modified
 
-## 4. Generate Plan
+# ⚠️ FINAL CHECKPOINT
 
-- Create focused task breakdown (max 10 tasks, fewer is better)
-- Organize into logical phases (e.g., "Phase 1: Foundation")
-- Use `- [ ]` syntax for all tasks
-- Prioritize by dependency and importance
-- Include only essential technical decisions
+**Before finishing:**
 
-## 5. Create Plan File
-
-Generate `${FEATURE_DIR}/plan.md` with:
-- Concise, actionable implementation steps
-- Critical decisions and next steps
-- Phase-organized tasks
-
-## 6. Update Context
-
-- Add plan summary to ${FEATURE_CONTEXT}
-- Link to plan.md
-- Preserve existing content and structure
-
-## 7. Validate Changes
-
-Before completing:
-1. Confirm ONLY modified files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
-2. Verify plan.md has clear, actionable tasks
-3. Check no source code or command files were touched
-
-# Output
-
-Summary:
-- Created: `${FEATURE_DIR}/plan.md`
-- Updated: `${FEATURE_CONTEXT}` with plan link
-- Task count and phase organization
-- Key technical decisions
-
-# ⚠️ FINAL CHECKPOINT ⚠️
-
-**Before you finish, verify:**
-- [ ] Modified ONLY `${SPECIFY_DIR}/${CURRENT_BRANCH}/` files
-- [ ] Did NOT touch command/source/config files
-- [ ] Created plan documentation, NOT implementation
-
-**If you modified ANY files outside `${SPECIFY_DIR}/${CURRENT_BRANCH}/`, you did it WRONG.**
+- [ ] Verify that you modified ONLY `${SPECS_DIR}/${CURRENT_BRANCH}/` files otherwise you did it WRONG. Do not modify any other source files.
+- [ ] Verify that you created documentation, NOT implementation.
 
 # Next Steps
 
-After running this command:
-1. Review `${FEATURE_DIR}/plan.md` for completeness
-2. Use `/clarify` to resolve any remaining ambiguities
-3. Use `/implement` to begin executing the plan
-4. Update plan as needed during implementation
-
-# Guidelines
-
-**Plan Best Practices:**
-- Use `- [ ]` checkbox syntax for all tasks
-- Organize into logical phases
-- Keep focused (max 10 tasks, fewer is better)
-- Prioritize by dependency and importance
-- Include only essential technical decisions
-- Maintain brief, scannable format
-
-**File Modification Rules:**
-- ✅ ONLY modify files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
-- ❌ NEVER touch source code, commands, configs
-- This command creates plan documentation, NOT implementation
-- When in doubt, you're probably modifying the wrong file
-
-**Scope Boundaries:**
-- Scan existing code to understand what's implemented
-- Follow links and files for domain context
-- But ONLY modify files in `${SPECIFY_DIR}/${CURRENT_BRANCH}/`
-- Create specifications only, don't implement the feature
+- Review the `${FEATURE_CONTEXT}` file to see the plan.
+- Run `/plan [description]` again to continue updating the plan.
+- Run `/implement [phase]` to execute phase the plan.

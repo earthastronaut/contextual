@@ -409,14 +409,24 @@ install_agent_commands() {
     # Create .contextual/commands directory
     mkdir -p "$contextual_commands_dir"
     
+    # Get the appropriate commands source (agent-specific or default)
+    local commands_source="$(get_agent_commands_source "$agent")"
+    
     # Copy command files to .contextual/commands (only including specified commands if filter is set)
     print_info "Installing command files to $contextual_commands_dir..."
-    if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
+    print_info "Source: $commands_source"
+    if [[ -d "$commands_source" ]] && ls "$commands_source"/*.md 1> /dev/null 2>&1; then
         local installed_count=0
         local skipped_count=0
-        for cmd_file in "$COMMANDS_SOURCE"/*.md; do
+        for cmd_file in "$commands_source"/*.md; do
             if [[ -f "$cmd_file" ]]; then
                 local cmd_name="$(basename "$cmd_file")"
+                # Skip test commands
+                if [[ "$cmd_name" =~ ^test ]]; then
+                    print_info "Skipping test command: $cmd_name"
+                    skipped_count=$((skipped_count + 1))
+                    continue
+                fi
                 if is_command_included "$cmd_name" "$include_commands"; then
                     cp "$cmd_file" "$contextual_commands_dir/"
                     installed_count=$((installed_count + 1))
@@ -433,7 +443,7 @@ install_agent_commands() {
             return 1
         fi
     else
-        print_warning "No command files found in $COMMANDS_SOURCE"
+        print_warning "No command files found in $commands_source"
         return 1
     fi
     
@@ -493,6 +503,23 @@ install_agent_commands() {
     fi
 }
 
+# Function to get agent-specific commands source directory
+get_agent_commands_source() {
+    local agent="$1"
+    local contextual_root="$(cd "$SCRIPT_DIR/.." && pwd)"
+    local agent_commands_dir="$contextual_root/.$agent/commands"
+    
+    # Check if agent-specific commands directory exists
+    if [[ -d "$agent_commands_dir" ]] && ls "$agent_commands_dir"/*.md 1> /dev/null 2>&1; then
+        echo "$agent_commands_dir"
+        return 0
+    fi
+    
+    # Fall back to default commands directory
+    echo "$COMMANDS_SOURCE"
+    return 0
+}
+
 # Function to install commands directly to agent folder (without .contextual)
 install_commands_only() {
     local project_dir="$1"
@@ -514,16 +541,26 @@ install_commands_only() {
     mkdir -p "$agent_commands_dir"
     print_success "Created $agent_folder directory"
     
+    # Get the appropriate commands source (agent-specific or default)
+    local commands_source="$(get_agent_commands_source "$agent")"
+    
     # Copy command files directly to agent folder (only including specified commands if filter is set)
     print_info "Installing command files directly to $agent_folder..."
+    print_info "Source: $commands_source"
     print_info "Note: Commands copied without config variable replacement"
     
-    if [[ -d "$COMMANDS_SOURCE" ]] && ls "$COMMANDS_SOURCE"/*.md 1> /dev/null 2>&1; then
+    if [[ -d "$commands_source" ]] && ls "$commands_source"/*.md 1> /dev/null 2>&1; then
         local installed_count=0
         local skipped_count=0
-        for cmd_file in "$COMMANDS_SOURCE"/*.md; do
+        for cmd_file in "$commands_source"/*.md; do
             if [[ -f "$cmd_file" ]]; then
                 local cmd_name="$(basename "$cmd_file")"
+                # Skip test commands
+                if [[ "$cmd_name" =~ ^test ]]; then
+                    print_info "Skipping test command: $cmd_name"
+                    skipped_count=$((skipped_count + 1))
+                    continue
+                fi
                 if is_command_included "$cmd_name" "$include_commands"; then
                     local target_path="$agent_commands_dir/$cmd_name"
                     # Remove existing file or symlink if it exists
@@ -545,7 +582,7 @@ install_commands_only() {
             return 1
         fi
     else
-        print_error "No command files found in $COMMANDS_SOURCE"
+        print_error "No command files found in $commands_source"
         return 1
     fi
     

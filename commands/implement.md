@@ -1,10 +1,18 @@
 ---
 config:
-  SPECIFY_DIR: specs
+  SPECS_DIR: specs
 ---
+
 # Goal
 
-Implement tasks from spec (spec-driven) OR execute a one-off task (ad-hoc).
+Implement tasks from spec (spec-driven) OR execute a single task (task mode).
+
+# Instructions
+
+**Note**: As you proceed, replace variables with the actual values. Use the config frontmatter for some of the global variable replacement.Example:
+
+- Input: "Set `${EXAMPLE}` as $(echo "hello world)"
+- Output: Everywhere ${EXAMPLE} is replaced with "hello world" when evaluating.
 
 # User Input
 
@@ -12,54 +20,48 @@ Implement tasks from spec (spec-driven) OR execute a one-off task (ad-hoc).
 ${ARGUMENTS}
 ```
 
-# Steps
+# Routing
 
-## 1. Find Specification
+1. Get branch: `git branch --show-current` → `${CURRENT_BRANCH}` (stop if `main`)
+2. Set `${FEATURE_DIR}` = `${SPECS_DIR}/${CURRENT_BRANCH}`, `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
+3. Replace all env variables with actual values.
+4. If context doesn't exist → error, warn the user to run `/plan` first
+5. Read ${FEATURE_CONTEXT} to see what tasks exist
+6. Route based on user input:
+   - User input references existing phase/task/section → **SPEC-DRIVEN** mode (implement tasks in the phase/task/section)
+   - User input is a new instruction → **TASK** mode
+   - User input is empty → **SPEC-DRIVEN** mode (next phase of uncompleted tasks)
 
-1. Get current branch: `git branch --show-current` → `${CURRENT_BRANCH}`
-2. Verify not on `main` - if on main, STOP
-3. Set `${FEATURE_CONTEXT}` = `${SPECIFY_DIR}/${CURRENT_BRANCH}/context.md`
-4. If context doesn't exist → tell user to run `/specify` first
+# Mode: TASK
 
-## 2. Determine Mode (Use Judgment)
+**When:** User input is a new instruction (not referencing existing spec tasks)
 
-Read ${FEATURE_CONTEXT} first, then decide:
-
-**When user input specifies existing phase, task, or section:**
-- → Spec-Driven Mode (3B)
-- Filter and implement only matching tasks
-- Examples: "phase 1", "task 2", "authentication tasks"
-
-**When user input is a new instruction:**
-- → One-Off Mode (3A)
-- Implement as ad-hoc task and track it
-- Examples: "update README", "add error handling", "fix typo"
-
-**Otherwise if uncertain or user input is empty:**
-- → Spec-Driven Mode (3B)
-- Implement next phase of uncompleted tasks
-
-## 3A. One-Off Task Mode
-
-1. Implement the task (${ARGUMENTS})
-2. Track in ${FEATURE_CONTEXT}:
+1. Analyze task based on user input.
+2. Break down into subtasks and execute them systematically.
+3. Validate implementation and handle errors
+4. Track in ${FEATURE_CONTEXT}:
+   - Read `${FEATURE_CONTEXT}`
    - Create "# Additional Tasks" section if needed
-   - Add `- [x] ${ARGUMENTS}`
-3. Skip to Output (step 4)
+   - Add `- [x] ${ARGUMENTS}` and save
 
-## 3B. Spec-Driven Mode
+# Mode: SPEC-DRIVEN
+
+**When:** User input references existing phase/task/section OR is empty
 
 1. **Find linked files**: Scan ${FEATURE_CONTEXT} for links, follow recursively (depth: 3)
+
    - Patterns: `[text](path)`, `@file`, `./path`, `[[link]]`, `$VAR`
    - Types: .md, .txt, .json, .yaml, .js, .ts, .py, .sh
    - Skip: External URLs, binaries
 
 2. **Extract tasks** from all files:
+
    - Uncompleted: `- [ ]`, `* [ ]`, `+ [ ]`
    - Ignore completed: `- [x]`, `* [x]`, `+ [x]`
    - Markers: `[HIGH]`, `[MEDIUM]`, `[LOW]`, `[CRITICAL]`, `TODO:`, `FIXME:`
 
 3. **Filter tasks** (if user input provided):
+
    - Phase/section name → tasks in that section
    - Task number → specific task
    - Keywords → matching descriptions
@@ -67,39 +69,18 @@ Read ${FEATURE_CONTEXT} first, then decide:
 
 4. **Execute**:
    - Organize by priority and dependencies
-   - Implement tasks, mark `[x]` in relevant files after each
-   - Continue on errors (halt only for critical failures)
+   - Implement tasks, mark `- [x]` in ALL files containing the task after each
+   - Continue on non-critical failures (document issues, only halt for critical errors)
 
-## 4. Output
+# Both Modes: Tracking
 
-**One-Off Mode:**
-- Task complete: `- [x] ${ARGUMENTS}` in "# Additional Tasks" section of ${FEATURE_CONTEXT}
-
-**Spec-Driven Mode:**
-- Concise summary of progress
-- All files updated with `[x]` markers
+- Update all files with `- [x]` completed markers for all tasks completed.
+- Brief summary of changes implemented.
 - Suggested commit message: `"feat: implement ${FEATURE}"`
 
 # Next Steps
 
-After running this command:
 1. Review implementation results
-2. Use `/commit` to save changes
-3. Use `/clarify` if ambiguities arise
-
-# Guidelines
-
-**Mode Selection:**
-1. Read ${FEATURE_CONTEXT} to see what tasks exist
-2. If input references spec (phase/task/keyword) → Spec-driven
-3. If input is new instruction → One-off
-4. If no input → Spec-driven (all tasks)
-
-**Task Tracking:**
-- Spec-driven: Mark `[x]` in ALL files containing the task
-- One-off: Add to "# Additional Tasks" section
-
-**Error Handling:**
-- Continue on non-critical failures
-- Document issues
-- Only halt for critical errors
+2. Review changes in ${FEATURE_CONTEXT}
+3. Use `/plan` to continue updating the plan.
+4. Use `/commit` to commit changes.
