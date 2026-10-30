@@ -42,13 +42,13 @@ Test the `${COMMAND}` command by reading the command markdown file and evaluatin
 **Description**: Test the file creation and directory structure logic.
 
 **Test Steps**:
-1. Analyze Steps 2-3 (Create Specification Directory, Generate Context File)
+1. Analyze Steps 2-3 (Create Specification Directory, Generate Plan File)
 2. Verify it creates proper directory structure
-3. Check context file template structure
+3. Check plan file template structure
 
 **Expected Results**:
 - Creates `${SPECIFY_DIR}/${CURRENT_BRANCH}/` directory
-- Generates context.md with proper template structure
+- Generates plan.md with proper template structure
 - Includes Overview, Scope, Solution, Tasks sections
 
 ## Test 4: Input Processing

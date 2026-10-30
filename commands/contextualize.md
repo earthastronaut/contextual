@@ -11,7 +11,7 @@ config:
 
 You're a leader responsible for providing detailed and concise contextual information for project execution. Link out to relevant project files.
 
-**CONSTRAINT: ONLY MODIFY FILES IN `${CONTEXT_DIR}`** - This command manages context documentation, not source code.
+**CONSTRAINT: ONLY MODIFY FILES IN `${CONTEXT_DIR}`** — This command manages context documentation, not source code. You may also update the "Context Files" section in `${CONTEXT_ROOT}` during empty-input bootstrap only.
 
 # User Input
 
@@ -19,7 +19,7 @@ You're a leader responsible for providing detailed and concise contextual inform
 ${ARGUMENTS}
 ```
 
-# Process
+# Steps
 
 ## 1. Setup & Discovery
 - **Initialize**: Run `ls -la ${CONTEXT_DIR}` or `mkdir -p ${CONTEXT_DIR}` if missing
@@ -27,14 +27,13 @@ ${ARGUMENTS}
 - **Scan changes**: Run `git diff --name-only --cached` and `git diff --name-only` for recent modifications
 - **Read context**: Use `find ${CONTEXT_DIR} -name "*.md" -type f` to get all context files, read each one
 - **Global context**: Read `${CONTEXT_ROOT}` if exists for project-wide conventions
-- **Follow links**: Track `[text](path)` or `[[link]]` references (max depth: 3)
+- **Follow links**: Track `[text](path)` or `[[link]]` references (max depth: 3; skip already-visited paths)
 
 ## 2. Parse & Analyze
 **Extract from user input:**
 - Keywords (domain terms, technical concepts, business requirements)
 - Intent (add/update/clarify/remove)
 - Scope (which context files are relevant)
-- Priority (urgent/critical/important indicators)
 
 **Patterns:**
 - "Add [concept] to [domain]" → Update specific context file
@@ -55,8 +54,9 @@ ${ARGUMENTS}
 **Update context files:**
 - Add new concepts with definitions and relationships
 - Update existing content, maintain consistency
+- Prefer updating existing files over creating new ones
 - Preserve structure, use consistent markdown formatting
-- Include cross-references and timestamps for major updates
+- Include cross-references; add an ISO date stamp only when replacing a major concept or decision
 - Create bidirectional links between related concepts
 
 # Output
@@ -64,26 +64,31 @@ ${ARGUMENTS}
 - Updated `${CONTEXT_DIR}` files with new information
 - Concise updates with `[NEEDS CLARIFICATION: question?]` prompts for missing info
 - Structured markdown with cross-references
+- Short summary of files touched and open clarifications
+
+# ⚠️ FINAL CHECKPOINT
+
+**Before finishing:**
+
+- [ ] Modified ONLY files under `${CONTEXT_DIR}` (plus `${CONTEXT_ROOT}` "Context Files" section on empty-input bootstrap)
+- [ ] Did NOT touch source code, commands, specs, or unrelated configs
 
 # Next Steps
 
 1. Review updated context files for completeness
 2. Address clarification prompts
-3. Use `/specify`, `/clarify`, or `/analyze` as needed
+3. Use `/plan` to specify work, then `/implement` to execute
 
 # Guidelines & Error Handling
 
 **Core Rules:**
-- ✅ ONLY modify files in `${CONTEXT_DIR}` directory
-- ❌ NEVER touch source code, commands, specs, or configs
-- Always update existing files over creating new ones
-- Maintain single source of truth, use consistent terminology
+- ✅ ONLY modify files in `${CONTEXT_DIR}` (exception: bootstrap Context Files in `${CONTEXT_ROOT}`)
+- ❌ NEVER touch source code, commands, or specs
+- Maintain single source of truth; use consistent terminology
 - Ask specific questions rather than open-ended ones
 
 **Common Issues & Solutions:**
 - **Directory not found**: `mkdir -p ${CONTEXT_DIR}`
-- **Permission denied**: `chmod 755 ${CONTEXT_DIR}`
 - **Git commands failing**: Check `git status`, run `git init` if needed
 - **File conflicts**: Ask user to clarify which information is correct
-- **Corrupted files**: Backup with `cp -r ${CONTEXT_DIR} ${CONTEXT_DIR}.backup/` then recreate
 - **Unclear input**: Ask for specific examples or rephrasing

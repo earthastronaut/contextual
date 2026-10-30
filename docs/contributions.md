@@ -109,19 +109,19 @@ contextual/
 Contextual Development Tools follows a spec-driven development approach:
 
 ### 1. Specify a Feature
-Use `/specify feature description` to create new feature specifications which creates a context.md file and a feature branch.
+Use `/specify feature description` to create new feature specifications which creates a plan.md file and a feature branch.
 
 ### 2. Clarify Requirements
-Use `/clarify` command to clarify the requirements of the feature. This will prompt you for any missing information and update the feature's context.md file.
+Use `/clarify` command to clarify the requirements of the feature. This will prompt you for any missing information and update the feature's plan.md file.
 
 ### 3. Analyze Project Structure
-Use `/analyze` command to analyze the project structure and add it to the feature's context.md file.
+Use `/analyze` command to analyze the project structure and add it to the feature's plan.md file.
 
 ### 4. Plan Implementation
-Use `/plan` command to create a plan and add it to the feature's context.md file.
+Use `/plan` command to create a plan and add it to the feature's plan.md file.
 
 ### 5. Implement the Feature
-Use `/implement` command to implement any tasks from the context.md file.
+Use `/implement` command to implement any tasks from the plan.md file.
 
 ### 6. Commit Changes
 Use `/commit` command to commit the changes. This will commit the changes to the feature branch with a generated commit message.
@@ -251,7 +251,7 @@ The contextual CLI provides several commands to help with development:
 
 ### Best Practices
 
-- **Keep context.md files small and focused** on the specific feature
+- **Keep plan.md files small and focused** on the specific feature
 - **Use clear, descriptive commit messages**
 - **Test thoroughly** before submitting changes
 - **Update documentation** when adding new features

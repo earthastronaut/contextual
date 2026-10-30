@@ -6,31 +6,38 @@ config:
 
 # Goal
 
-Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/updates **DOCUMENTATION ONLY** - never source code.
+Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/updates **DOCUMENTATION ONLY** — never source code.
 
 # Instructions
 
-**Note**: As you proceed, replace variables with the actual values. Use the config frontmatter for some of the global variable replacement.Example:
+Replace `${VARIABLE}` placeholders with resolved values as you go. Config frontmatter supplies globals (e.g. `${SPECS_DIR}`, `${AGENTS_MD}`).
 
-- Input: "Set `${EXAMPLE}` as $(echo "hello world)"
-- Output: Everywhere ${EXAMPLE} is replaced with "hello world" when evaluating.
+# User Input
+
+```text
+${ARGUMENTS}
+```
+
+- **CREATE**: seed Problem Statement / Scope / Solution from the request
+- **CLARIFY**: answers to open `[NEEDS CLARIFICATION: …]` markers; if empty, ask interactively
+- **PLAN**: optional focus for regenerating Tasks; if empty, plan from the full spec
 
 # Routing
 
-1. Get branch: `git branch --show-current` → `${CURRENT_BRANCH}` (stop if `main`)
-2. Set `${FEATURE_DIR}` = `${SPECS_DIR}/${CURRENT_BRANCH}`, `${FEATURE_CONTEXT}` = `${FEATURE_DIR}/context.md`
+1. Get branch: `git branch --show-current` → `${CURRENT_BRANCH}` (stop if `main`; tell user to switch to a feature branch)
+2. Set `${FEATURE_DIR}` = `${SPECS_DIR}/${CURRENT_BRANCH}`, `${FEATURE_PLAN}` = `${FEATURE_DIR}/plan.md`
 3. Replace all env variables with actual values.
 4. Route if:
-   - No `context.md` exists → **CREATE** mode
-   - `context.md` exists with `[NEEDS CLARIFICATION]` markers → **CLARIFY** mode
-   - `context.md` exists without `[NEEDS CLARIFICATION]` markers → **PLAN** mode
+   - No `plan.md` exists → **CREATE** mode
+   - `plan.md` exists with `[NEEDS CLARIFICATION` markers → **CLARIFY** mode
+   - `plan.md` exists without those markers → **PLAN** mode
 
 # Mode: CREATE
 
-**When:** `${FEATURE_CONTEXT}` does not exist
+**When:** `${FEATURE_PLAN}` does not exist
 
-1. Make the directory ${FEATURE_DIR}` if it doesn't exist
-2. Create `${FEATURE_CONTEXT}` from:
+1. Make the directory `${FEATURE_DIR}` if it doesn't exist
+2. Create `${FEATURE_PLAN}` from:
 
 ```markdown
 # Problem Statement
@@ -65,13 +72,13 @@ Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/upd
 
 # Mode: CLARIFY
 
-**When:** `${FEATURE_CONTEXT}` exists with `[NEEDS CLARIFICATION]` markers
+**When:** `${FEATURE_PLAN}` exists with `[NEEDS CLARIFICATION` markers
 
-1. Read `${FEATURE_CONTEXT}` and related files, identify all `[NEEDS CLARIFICATION]` markers
+1. Read `${FEATURE_PLAN}` and related files, identify all `[NEEDS CLARIFICATION: …]` markers
 2. Read `${AGENTS_MD}` if relevant
 3. **If user input provided:**
-   - Update `${FEATURE_CONTEXT}` sections (Overview, Scope, Solution, Tasks)
-   - Add new `[NEEDS CLARIFICATION]` markers as needed
+   - Update `${FEATURE_PLAN}` sections (Problem Statement, Scope, Solution, Tasks)
+   - Add new `[NEEDS CLARIFICATION: question?]` markers as needed
    - Remove resolved markers
 4. **If NO user input:**
    - Present ONE question at a time with options table (A/B/Custom)
@@ -81,13 +88,20 @@ Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/upd
 
 # Mode: PLAN
 
-**When:** `${FEATURE_CONTEXT}` exists without `[NEEDS CLARIFICATION]` markers
+**When:** `${FEATURE_PLAN}` exists without `[NEEDS CLARIFICATION` markers
 
-1. Extract requirements/acceptance criteria from `${FEATURE_CONTEXT}`
-2. Review `${FEATURE_DIR}/analyzed.md` if exists, else scan project code
-3. Generate plan: max 10 tasks, organized in phases, use `- [ ]` syntax. DRY. Reference the solution and scope sections. Be concise. Keep requirements concrete and measurable. Prioritize by dependencies.
-4. Update `${FEATURE_CONTEXT}` with plan summary.
+1. Extract requirements/acceptance criteria from `${FEATURE_PLAN}`
+2. Review `${FEATURE_DIR}/analyzed.md` if exists (optional prior analysis notes), else scan project code
+3. Generate plan: max 10 tasks, organized in phases, use `- [ ]` syntax. DRY. Reference the Solution and Scope sections. Be concise. Keep requirements concrete and measurable. Prioritize by dependencies.
+4. Replace the `# Tasks` section in `${FEATURE_PLAN}` with the new plan (preserve Problem Statement, Scope, Solution). Keep already-completed `- [x]` items if they still apply; drop obsolete ones.
 5. Validate: only `${SPECS_DIR}/${CURRENT_BRANCH}/` files modified
+
+# Output
+
+- Mode used (CREATE / CLARIFY / PLAN)
+- Path to `${FEATURE_PLAN}`
+- Open clarification count (if any)
+- Brief summary of what changed
 
 # ⚠️ FINAL CHECKPOINT
 
@@ -98,6 +112,6 @@ Route to CREATE, CLARIFY, or PLAN mode based on specification state. Creates/upd
 
 # Next Steps
 
-- Review the `${FEATURE_CONTEXT}` file to see the plan.
+- Review the `${FEATURE_PLAN}` file to see the plan.
 - Run `/plan [description]` again to continue updating the plan.
-- Run `/implement [phase]` to execute phase the plan.
+- Run `/implement [phase]` to execute the phase in the plan.

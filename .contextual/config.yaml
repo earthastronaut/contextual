@@ -14,7 +14,7 @@
 #   Merge {FEATURE_BRANCH}: {DESCRIPTION}
 #   - {commit_hash}: one line per commit included.
 #   ...
-#   spec: {FEATURE_CONTEXT}
+#   spec: {FEATURE_PLAN}
 
 # Folder Analyzer - Exclude Patterns
 # List of patterns to exclude during analysis (case-insensitive substring match)
